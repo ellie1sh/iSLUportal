@@ -5,6 +5,8 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
 import java.io.*;
 
 public class ISLUStudentPortal extends JFrame {
@@ -38,6 +40,7 @@ public class ISLUStudentPortal extends JFrame {
         setupLayout();
         loadAnnouncements();
         loadStudentStatus();
+        updateSemesterDisplay();
     }
 
     /**
@@ -447,23 +450,92 @@ public class ISLUStudentPortal extends JFrame {
     }
     // Content for student status
     private void loadStudentStatus() {
+        StringBuilder status = new StringBuilder();
+        
+        // Initialize sample data if needed
+        DataInitializer.initializeSampleData();
+        
+        // Get enhanced student information
+        Optional<Student> studentOpt = ScheduleService.getStudentById(studentID);
+        if (studentOpt.isPresent()) {
+            Student student = studentOpt.get();
+            
+            status.append("Status:\n");
+            status.append("- ").append(student.getStatusDisplay()).append("\n\n");
+            
+            // Add course enrollment information
+            List<Course> courses = student.getCourses();
+            int totalUnits = student.getTotalUnits();
+            
+            status.append("Enrollment Summary:\n");
+            status.append("• Total Courses Enrolled: ").append(courses.size()).append("\n");
+            status.append("• Total Units: ").append(totalUnits).append("\n");
+            status.append("• Academic Year: ").append(student.getAcademicYear()).append("\n");
+            status.append("• Semester: ").append(student.getSemester()).append("\n");
+            if (student.getBlock() != null) {
+                status.append("• Block/Section: ").append(student.getBlock()).append("\n");
+            }
+            status.append("\n");
+            
+            // Add current courses
+            if (!courses.isEmpty()) {
+                status.append("Current Courses:\n");
+                for (Course course : courses) {
+                    status.append("• ").append(course.getClassCode())
+                          .append(" - ").append(course.getCourseDescription())
+                          .append(" (").append(course.getUnits()).append(" units)\n");
+                    if (course.getScheduleDisplay() != null && !course.getScheduleDisplay().isEmpty()) {
+                        status.append("  Time: ").append(course.getScheduleDisplay())
+                              .append(" ").append(course.getDays());
+                        if (course.getRoom() != null) {
+                            status.append(" - Room ").append(course.getRoom());
+                        }
+                        status.append("\n");
+                    }
+                }
+                status.append("\n");
+            }
+        } else {
+            status.append("Status:\n");
+            status.append("- ").append(this.status).append("\n\n");
+        }
+        
+        status.append("Announcement from instructor:\n\n");
+        status.append("Class: 7024-NSTP-CWTS 1\n\n");
+        status.append("Google classroom invite link:\n");
+        status.append("https://classroom.google.com/c/NzkxOTgxNDQ3NTcy?cjc=3hnunus2\n\n");
+        status.append("Instructor: Bullong, Doris K.\n\n");
+        status.append("─────────────────────────────────────────────────────\n\n");
+        status.append("Additional Information:\n");
+        status.append("• Make sure to check your class schedule regularly\n");
+        status.append("• Join the Google Classroom for important updates\n");
+        status.append("• Contact your instructor for any class-related queries\n");
+        status.append("• Keep track of assignment deadlines and exam schedules\n");
+        status.append("• Access your detailed schedule through the Schedule menu");
 
-        String status = "Status:\n" +
-                "- " + this.status + "\n\n\n" +
-                "Announcement from instructor:\n\n" +
-                "Class: 7024-NSTP-CWTS 1\n\n" +
-                "Google classroom invite link:\n" +
-                "https://classroom.google.com/c/NzkxOTgxNDQ3NTcy?cjc=3hnunus2\n\n" +
-                "Instructor: Bullong, Doris K.\n\n" +
-                "─────────────────────────────────────────────────────\n\n" +
-                "Additional Information:\n" +
-                "• Make sure to check your class schedule regularly\n" +
-                "• Join the Google Classroom for important updates\n" +
-                "• Contact your instructor for any class-related queries\n" +
-                "• Keep track of assignment deadlines and exam schedules";
-
-        statusArea.setText(status);
+        statusArea.setText(status.toString());
         statusArea.setCaretPosition(0);
+    }
+    
+    /**
+     * Updates the semester display with enhanced student data
+     */
+    private void updateSemesterDisplay() {
+        // Initialize sample data if needed
+        DataInitializer.initializeSampleData();
+        
+        // Get enhanced student information
+        Optional<Student> studentOpt = ScheduleService.getStudentById(studentID);
+        if (studentOpt.isPresent()) {
+            Student student = studentOpt.get();
+            String semesterDisplay = student.getSemesterDisplay();
+            if (semesterDisplay != null && !semesterDisplay.isEmpty()) {
+                this.semester = semesterDisplay;
+                if (semesterLabel != null) {
+                    semesterLabel.setText(semesterDisplay);
+                }
+            }
+        }
     }
 
     // method for showing different contents
@@ -505,20 +577,12 @@ public class ISLUStudentPortal extends JFrame {
         JPanel schedulePanel = new JPanel(new BorderLayout());
         schedulePanel.setBorder(BorderFactory.createTitledBorder("Class Schedule"));
 
-        // Use the subItems from the MenuItem to set the column names
-        String[] columnNames = subItems.toArray(new String[0]);
+        // Initialize sample data if not already done
+        DataInitializer.initializeSampleData();
 
-        // Populate with your actual data
-        Object[][] data = {
-                {"7:00-8:00", "", "", "", "", ""},
-                {"8:00-9:00", "NSTP-CWTS 1", "", "NSTP-CWTS 1", "", ""},
-                {"9:00-10:00", "Programming 2", "", "Programming 2", "", "Programming 2"},
-                {"10:00-11:00", "Data Structures", "", "Data Structures", "", "Data Structures"},
-                {"11:00-12:00", "", "", "", "", ""},
-                {"1:00-2:00", "Database Systems", "", "Database Systems", "", ""},
-                {"2:00-3:00", "", "Web Development", "", "Web Development", ""},
-                {"3:00-4:00", "", "", "", "", ""}
-        };
+        // Use the ScheduleService to get real course data
+        String[] columnNames = ScheduleService.getScheduleColumnNames();
+        Object[][] data = ScheduleService.createScheduleTableData(studentID);
 
         DefaultTableModel scheduleModel = new DefaultTableModel(data, columnNames) {
             @Override
@@ -526,17 +590,105 @@ public class ISLUStudentPortal extends JFrame {
                 return false; // Make all cells non-editable
             }
         };
+        
         JTable scheduleTable = new JTable(scheduleModel);
-        scheduleTable.setRowHeight(30);
+        scheduleTable.setRowHeight(40); // Increased height for better readability
         scheduleTable.getTableHeader().setReorderingAllowed(false); // Disable column reordering
         scheduleTable.setAutoCreateRowSorter(false); // Disable sorting
+        
+        // Improve table appearance
+        scheduleTable.setFont(new Font("Arial", Font.PLAIN, 11));
+        scheduleTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        scheduleTable.setGridColor(new Color(200, 200, 200));
+        scheduleTable.setShowGrid(true);
+        
+        // Set column widths
+        scheduleTable.getColumnModel().getColumn(0).setPreferredWidth(80); // Time column
+        for (int i = 1; i < scheduleTable.getColumnCount(); i++) {
+            scheduleTable.getColumnModel().getColumn(i).setPreferredWidth(120); // Day columns
+        }
+        
+        // Enable text wrapping in cells
+        scheduleTable.setDefaultRenderer(Object.class, new javax.swing.table.DefaultTableCellRenderer() {
+            @Override
+            public java.awt.Component getTableCellRendererComponent(JTable table, Object value, 
+                    boolean isSelected, boolean hasFocus, int row, int column) {
+                super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                
+                // Set text alignment
+                if (column == 0) {
+                    setHorizontalAlignment(SwingConstants.CENTER); // Center time column
+                } else {
+                    setHorizontalAlignment(SwingConstants.LEFT); // Left align course info
+                }
+                
+                // Handle multi-line text
+                String text = value != null ? value.toString() : "";
+                if (text.contains("\n")) {
+                    setToolTipText("<html>" + text.replaceAll("\n", "<br>") + "</html>");
+                } else {
+                    setToolTipText(text);
+                }
+                
+                return this;
+            }
+        });
+
         JScrollPane scrollPane = new JScrollPane(scheduleTable);
 
-        schedulePanel.add(scrollPane, BorderLayout.CENTER);
+        // Add schedule summary panel
+        JPanel summaryPanel = createScheduleSummaryPanel();
+        
+        // Create main content panel
+        JPanel contentPanel = new JPanel(new BorderLayout());
+        contentPanel.add(scrollPane, BorderLayout.CENTER);
+        contentPanel.add(summaryPanel, BorderLayout.SOUTH);
+        
+        schedulePanel.add(contentPanel, BorderLayout.CENTER);
 
         // Return the newly created panel instead of adding it here.
         // The caller method (e.g., showContent) will add it to the main panel.
         return schedulePanel;
+    }
+    
+    /**
+     * Creates a summary panel showing total courses and units
+     */
+    private JPanel createScheduleSummaryPanel() {
+        JPanel summaryPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        summaryPanel.setBorder(BorderFactory.createTitledBorder("Schedule Summary"));
+        summaryPanel.setBackground(Color.WHITE);
+        
+        // Get schedule summary
+        ScheduleService.ScheduleSummary summary = ScheduleService.getScheduleSummary(studentID);
+        
+        // Create summary labels
+        JLabel coursesLabel = new JLabel("Total Courses: " + summary.getTotalCourses());
+        coursesLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        
+        JLabel unitsLabel = new JLabel("Total Units: " + summary.getTotalUnits());
+        unitsLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        
+        // Add some spacing
+        summaryPanel.add(coursesLabel);
+        summaryPanel.add(Box.createHorizontalStrut(20));
+        summaryPanel.add(unitsLabel);
+        
+        // Add courses per day breakdown
+        summaryPanel.add(Box.createHorizontalStrut(20));
+        JLabel breakdownLabel = new JLabel("Daily Breakdown: ");
+        breakdownLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        summaryPanel.add(breakdownLabel);
+        
+        String[] dayAbbreviations = {"M", "T", "W", "TH", "F"};
+        for (String day : dayAbbreviations) {
+            int coursesForDay = summary.getCoursesForDay(day);
+            JLabel dayLabel = new JLabel(day + ":" + coursesForDay + " ");
+            dayLabel.setFont(new Font("Arial", Font.PLAIN, 11));
+            summaryPanel.add(dayLabel);
+        }
+        
+        return summaryPanel;
     }
     // method for attendance Content
     private Component showAttendanceContent(LinkedList<String> subItems) {
