@@ -133,6 +133,7 @@ public class PortalUtils {
         scheduleSubList.add("Wednesday");
         scheduleSubList.add("Thursday");
         scheduleSubList.add("Friday");
+        scheduleSubList.add("Saturday");
         return scheduleSubList;
     }
     

@@ -546,6 +546,7 @@ public class ISLUStudentPortal extends JFrame {
             row[3] = courseLabelAtTime(courses, slot, "W");
             row[4] = courseLabelAtTime(courses, slot, "TH");
             row[5] = courseLabelAtTime(courses, slot, "F");
+            row[6] = courseLabelAtTime(courses, slot, "S");
             rows.add(row);
         }
 
@@ -651,7 +652,7 @@ public class ISLUStudentPortal extends JFrame {
                     case 'T': set.add("T"); break;
                     case 'W': set.add("W"); break;
                     case 'F': set.add("F"); break;
-                    case 'S': /* ignore Saturday for 5-day grid */ break;
+                    case 'S': set.add("S"); break;
                     default: break;
                 }
             }
