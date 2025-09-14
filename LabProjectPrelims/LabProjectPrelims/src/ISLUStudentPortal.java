@@ -497,6 +497,9 @@ public class ISLUStudentPortal extends JFrame {
             case "📋 Transcript of Records":
                 contentPanel.add(createTranscriptOfRecordsPanel());
                 break;
+            case "ℹ️ Downloadable/ About iSLU":
+                contentPanel.add(createDownloadablesAboutPanel());
+                break;
             default:
                 // Fallback for any other menu item with a sublist
                 showGenericContent(item.getName());
@@ -1101,6 +1104,196 @@ public class ISLUStudentPortal extends JFrame {
         mainPanel.add(rightPanel, BorderLayout.EAST);
 
         return mainPanel;
+    }
+
+    private JPanel createDownloadablesAboutPanel() {
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(new Color(240, 240, 240));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Left: Downloadables
+        JPanel leftPanel = new JPanel(new BorderLayout());
+        leftPanel.setBackground(Color.WHITE);
+        leftPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
+
+        JLabel leftHeader = new JLabel("📥 Downloadables");
+        leftHeader.setFont(new Font("Arial", Font.BOLD, 16));
+        leftHeader.setBorder(BorderFactory.createEmptyBorder(5, 5, 10, 5));
+        leftPanel.add(leftHeader, BorderLayout.NORTH);
+
+        JEditorPane downloadablesPane = new JEditorPane();
+        downloadablesPane.setContentType("text/html");
+        downloadablesPane.setEditable(false);
+        downloadablesPane.setText(buildDownloadablesHtml());
+        downloadablesPane.setBackground(Color.WHITE);
+        JScrollPane leftScroll = new JScrollPane(downloadablesPane);
+        leftScroll.setBorder(BorderFactory.createEmptyBorder());
+        leftPanel.add(leftScroll, BorderLayout.CENTER);
+
+        // Right: About iSLU
+        JPanel rightPanel = new JPanel(new BorderLayout());
+        rightPanel.setBackground(Color.WHITE);
+        rightPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
+
+        JLabel rightHeader = new JLabel("ℹ️ About iSLU");
+        rightHeader.setFont(new Font("Arial", Font.BOLD, 16));
+        rightHeader.setBorder(BorderFactory.createEmptyBorder(5, 5, 10, 5));
+        rightPanel.add(rightHeader, BorderLayout.NORTH);
+
+        JEditorPane aboutPane = new JEditorPane();
+        aboutPane.setContentType("text/html");
+        aboutPane.setEditable(false);
+        aboutPane.setText(buildAboutISLUHtml());
+        aboutPane.setBackground(Color.WHITE);
+        JScrollPane rightScroll = new JScrollPane(aboutPane);
+        rightScroll.setBorder(BorderFactory.createEmptyBorder());
+        rightPanel.add(rightScroll, BorderLayout.CENTER);
+
+        // Layout
+        leftPanel.setPreferredSize(new Dimension(650, 0));
+        rightPanel.setPreferredSize(new Dimension(450, 0));
+        mainPanel.add(leftPanel, BorderLayout.CENTER);
+        mainPanel.add(rightPanel, BorderLayout.EAST);
+
+        return mainPanel;
+    }
+
+    private String buildDownloadablesHtml() {
+        String style = "<style>"
+                + "body{font-family:Arial, sans-serif; font-size:12px; color:#000;}"
+                + "h3{margin:12px 0 6px; color:#000;}"
+                + "ul{margin:4px 0 10px 18px;}"
+                + "li{margin:2px 0;}"
+                + ".dl{color:#c00; font-weight:normal;}"
+                + ".sec{border-top:1px solid #1e5a94; padding-top:8px; margin-top:10px;}"
+                + "</style>";
+
+        String dl = " <span class='dl'>[download]</span>";
+
+        StringBuilder html = new StringBuilder();
+        html.append("<html>").append(style).append("<body>");
+
+        html.append("<div class='sec'><h3>General</h3><ul>");
+        html.append("<li>Student Handbook" + dl + "</li>");
+        html.append("<li>Safety Orientation Manual" + dl + "</li>");
+        html.append("<li>Ordinance 021-2018 - Harassment" + dl + "</li>");
+        html.append("<li>GSuite for Education" + dl + "</li>");
+        html.append("<li>The Mission and Identity Cluster" + dl + "</li>");
+        html.append("<li>Official List of Student Organizations" + dl + "</li>");
+        html.append("<li>UNIVERSITY LIBRARIES" + dl + "</li>");
+        html.append("<li>OSA Student Services Orientation" + dl + "</li>");
+        html.append("<li>KASAMA SSC Orientation" + dl + "</li>");
+        html.append("<li>Feeling at Home in SLU" + dl + "</li>");
+        html.append("<li>Health and Safety Protocols re COVID 19 Prevention and Control" + dl + "</li>");
+        html.append("<li>Policies and Guidelines on Student Behavior during Online Correspondence Based Learning" + dl + "</li>");
+        html.append("<li>SLU Policy on COVID-19 Prevention and Control Measures in the Workplace" + dl + "</li>");
+        html.append("<li>SLU Privacy Policy" + dl + "</li>");
+        html.append("<li>SLU Quality Policy" + dl + "</li>");
+        html.append("<li>SLU UNIVERSITY PRAYER" + dl + "</li>");
+        html.append("<li>Special Guidelines for Recognition or Renewal of Recognition 2021 to 2022" + dl + "</li>");
+        html.append("<li>Baguio City Anti Discrimination Ordinance" + dl + "</li>");
+        html.append("<li>IRR of RA 11313 Safe Spaces Act" + dl + "</li>");
+        html.append("<li>Safe Spaces Act 20190474 RA 11313 IRD" + dl + "</li>");
+        html.append("<li>Emails of SLU Student Groups" + dl + "</li>");
+        html.append("</ul></div>");
+
+        html.append("<div class='sec'><h3>Center for Counseling and Wellness</h3><ul>");
+        html.append("<li>Handouts for Parents on their Child/rens Independent Living in College." + dl + "</li>");
+        html.append("<li>Freshie Career Booklet" + dl + "</li>");
+        html.append("<li>Referral Guide Poster" + dl + "</li>");
+        html.append("<li>SLUN Brochure" + dl + "</li>");
+        html.append("<li>SLUN Form" + dl + "</li>");
+        html.append("<li>The Louisian Journal 2023" + dl + "</li>");
+        html.append("<li>CCW Referral Form" + dl + "</li>");
+        html.append("</ul></div>");
+
+        html.append("<div class='sec'><h3>Other Student Services</h3><ul>");
+        html.append("<li>MEDICAL CLINIC CONTINUITY PLAN" + dl + "</li>");
+        html.append("<li>Online Schedule of Medical Clinic" + dl + "</li>");
+        html.append("<li>SLU Residence Halls" + dl + "</li>");
+        html.append("</ul></div>");
+
+        html.append("<div class='sec'><h3>SAMCIS</h3><ul>");
+        html.append("<li>SAMCIS Online Helpdesk" + dl + "</li>");
+        html.append("<li>SAMCIS Program Offerings Overview" + dl + "</li>");
+        html.append("<li>SAS HELPEDESK" + dl + "</li>");
+        html.append("</ul></div>");
+
+        html.append("<div class='sec'><h3>SEA</h3><ul>");
+        html.append("<li>SEA Online Helpdesk" + dl + "</li>");
+        html.append("<li>SEA Program Offerings Overview" + dl + "</li>");
+        html.append("</ul></div>");
+
+        html.append("<div class='sec'><h3>SONAHBS</h3><ul>");
+        html.append("<li>SONAHBS Online Helpdesk" + dl + "</li>");
+        html.append("</ul></div>");
+
+        html.append("<div class='sec'><h3>SOM</h3><ul>");
+        html.append("<li>SOM Online Helpdesk" + dl + "</li>");
+        html.append("</ul></div>");
+
+        html.append("<div class='sec'><h3>STELA</h3><ul>");
+        html.append("<li>STELA Online Helpdesk" + dl + "</li>");
+        html.append("<li>STELA Program Offerings Overview" + dl + "</li>");
+        html.append("</ul></div>");
+
+        html.append("<div class='sec'><h3>Student Services Orientation</h3><ul>");
+        html.append("<li>Guidance Center</li>");
+        html.append("<li>Office of Student Affairs</li>");
+        html.append("<li>University Registrar's Office</li>");
+        html.append("<li>University Libraries</li>");
+        html.append("<li>Office of External Relations, Media & Communications, and Alumni Affairs</li>");
+        html.append("<li>Office of the Vice President for Mission and Identity</li>");
+        html.append("<li>Campus Planning, Maintenance, and Security Department</li>");
+        html.append("<li>Dental Clinic</li>");
+        html.append("<li>Medical Clinic</li>");
+        html.append("<li>Technology Management and Development Department</li>");
+        html.append("</ul></div>");
+
+        html.append("</body></html>");
+        return html.toString();
+    }
+
+    private String buildAboutISLUHtml() {
+        String style = "<style>"
+                + "body{font-family:Arial, sans-serif; font-size:12px; color:#000;}"
+                + "h3{margin:12px 0 6px; color:#000;}"
+                + "p{margin:6px 0;}"
+                + "ul{margin:4px 0 10px 18px;}"
+                + "li{margin:3px 0;}"
+                + ".title{background:#0a2d5a; color:#fff; padding:8px 10px; font-weight:bold;}"
+                + "hr{border:0; border-top:2px solid #1e5a94; margin:10px 0;}"
+                + "</style>";
+
+        StringBuilder html = new StringBuilder();
+        html.append("<html>").append(style).append("<body>");
+        html.append("<div class='title'>About iSLU</div>");
+        html.append("<h3>OVERVIEW</h3>");
+        html.append("<h4>ABOUT iSLU PORTAL</h4>");
+        html.append("<p>iSLU Portal is for Saint Louis University students and parents, that serves as a personal assistant in carrying out university-related tasks.</p>");
+        html.append("<p>Students can view their personal details, schedules, current grades, accountabilities, curriculum checklist and more. Parents can also view these modules of their children as long they register.</p>");
+        html.append("<h4>FEATURES AVAILABLE</h4>");
+        html.append("<ul>");
+        html.append("<li><b>Personal Details:</b> where a student can view his/her personal information.</li>");
+        html.append("<li><b>Class Schedule:</b> where a student can view his/her enrolled subjects of the current term.</li>");
+        html.append("<li><b>Class Attendance:</b> displays the absences of the student of the current term.</li>");
+        html.append("<li><b>Current Grades:</b> shows the Prelim, Mid-term and Tentative final grades of a student.</li>");
+        html.append("<li><b>Transcript of Records:</b> shows the final grades in the previous term of a student.</li>");
+        html.append("<li><b>Statements of Accounts:</b> shows if a student still has account balance from the accounting office.</li>");
+        html.append("<li><b>Curriculum Checklist:</b> shows the student's checklist of a curriculum chosen.</li>");
+        html.append("<li><b>School Calendar:</b> where a student can view the school events and no classes within an academic year.</li>");
+        html.append("</ul>");
+        html.append("<h4>HOW TO REGISTER? Or FORGOT USER ID Number and PASSWORD!</h4>");
+        html.append("<p><b>STUDENTS:</b> proceed to IT CENTER SOFTWARE DEVELOPMENT (MIS), 2nd floor, Burgos Administrative Center, Saint Louis University.</p>");
+        html.append("<p><b>PARENTS/GUARDIANS:</b> register at Registrar’s office, Diego Silang building, Saint Louis University.</p>");
+        html.append("</body></html>");
+        return html.toString();
     }
 
     private JPanel createStatementLeftPanel() {
