@@ -497,6 +497,9 @@ public class ISLUStudentPortal extends JFrame {
             case "📋 Transcript of Records":
                 contentPanel.add(createTranscriptOfRecordsPanel());
                 break;
+            case "📚 Journal/Periodical":
+                contentPanel.add(createJournalPeriodicalPanel());
+                break;
             case "ℹ️ Downloadable/ About iSLU":
                 contentPanel.add(createAboutISLUPanel());
                 break;
@@ -2173,5 +2176,144 @@ public class ISLUStudentPortal extends JFrame {
             "Medical Clinic",
             "Technology Management and Development Department"
         };
+    }
+
+    /**
+     * Creates the Journal/Periodical panel modeled after the SLU Libraries
+     * Periodical Article Indexes page shown in the provided screenshot.
+     */
+    private JPanel createJournalPeriodicalPanel() {
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(Color.WHITE);
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Header title (simulating the page header)
+        JPanel headerPanel = new JPanel();
+        headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
+        headerPanel.setBackground(Color.WHITE);
+
+        JLabel title1 = new JLabel("SAINT LOUIS UNIVERSITY LIBRARIES");
+        title1.setFont(new Font("Arial", Font.BOLD, 20));
+        title1.setForeground(new Color(10, 45, 90));
+        title1.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        JLabel title2 = new JLabel("PERIODICAL ARTICLE INDEXES");
+        title2.setFont(new Font("Arial", Font.BOLD, 16));
+        title2.setForeground(new Color(10, 45, 90));
+        title2.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        headerPanel.add(title1);
+        headerPanel.add(title2);
+        headerPanel.add(Box.createVerticalStrut(15));
+
+        // Search row (text field + buttons)
+        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
+        searchPanel.setBackground(Color.WHITE);
+
+        JTextField searchField = new JTextField();
+        searchField.setPreferredSize(new Dimension(420, 28));
+
+        JButton searchButton = new JButton("Search");
+        JButton advanceButton = new JButton("Advance Search");
+
+        // Simple placeholder actions
+        searchButton.addActionListener(e -> {
+            String q = searchField.getText().trim();
+            if (q.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please enter a topic to search.", "Search", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "This would search the Periodical Article Indexes for:\n\n" + q +
+                                "\n\nSample bibliographic details would be listed here.",
+                        "Search", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+        advanceButton.addActionListener(e -> JOptionPane.showMessageDialog(this,
+                "Advanced search options would be provided here (e.g., author, subject, date).",
+                "Advance Search", JOptionPane.INFORMATION_MESSAGE));
+
+        searchPanel.add(searchField);
+        searchPanel.add(searchButton);
+        searchPanel.add(advanceButton);
+
+        headerPanel.add(searchPanel);
+        headerPanel.add(Box.createVerticalStrut(10));
+
+        mainPanel.add(headerPanel, BorderLayout.NORTH);
+
+        // Body content
+        JPanel bodyPanel = new JPanel();
+        bodyPanel.setLayout(new BoxLayout(bodyPanel, BoxLayout.Y_AXIS));
+        bodyPanel.setBackground(Color.WHITE);
+        bodyPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // Helper to create a section
+        java.util.function.BiConsumer<String, String> addSection = (heading, text) -> {
+            JLabel h = new JLabel(heading);
+            h.setFont(new Font("Arial", Font.BOLD, 13));
+            h.setForeground(Color.BLACK);
+            h.setAlignmentX(Component.LEFT_ALIGNMENT);
+            bodyPanel.add(h);
+            bodyPanel.add(Box.createVerticalStrut(6));
+
+            JTextArea a = new JTextArea(text);
+            a.setFont(new Font("Arial", Font.PLAIN, 12));
+            a.setLineWrap(true);
+            a.setWrapStyleWord(true);
+            a.setEditable(false);
+            a.setBackground(Color.WHITE);
+            a.setBorder(null);
+            a.setAlignmentX(Component.LEFT_ALIGNMENT);
+            bodyPanel.add(a);
+            bodyPanel.add(Box.createVerticalStrut(12));
+        };
+
+        addSection.accept(
+                "WHAT ARE JOURNAL INDEXES?",
+                "An index is a list of items pulled together for a purpose. Journal indexes (also called bibliographic indexes or bibliographic databases) are lists of journals, organized by discipline, subject, or type of publication.");
+
+        addSection.accept(
+                "THE SLU LIBRARIES' PERIODICAL ARTICLE INDEXES",
+                "One of the Home Library Services that the University Libraries offer is the Periodical Article Indexes where the subscribed print journals are being indexed and can be accessed through an online bibliographic database.\n\n" +
+                "The Periodical Article Indexes database provides access to periodical articles by subject or author and it can help you find articles about a specific topic.");
+
+        // Steps section
+        JLabel stepsHeader = new JLabel("STEPS IN ACCESSING THE PERIODICAL ARTICLE INDEXES");
+        stepsHeader.setFont(new Font("Arial", Font.BOLD, 13));
+        stepsHeader.setForeground(Color.BLACK);
+        stepsHeader.setAlignmentX(Component.LEFT_ALIGNMENT);
+        bodyPanel.add(stepsHeader);
+        bodyPanel.add(Box.createVerticalStrut(6));
+
+        String[] steps = new String[]{
+                "1. Enter your topic on the search box and click Search",
+                "2. You will see the various bibliographic details (i.e. title of the journal, the specific date, volume and issue, and page numbers for the article) that contain your topic.",
+                "3. Should you opt to read the full text of the article, you may request it by sending an email to uldir@slu.edu.ph"
+        };
+
+        for (String s : steps) {
+            JTextArea t = new JTextArea(s);
+            t.setFont(new Font("Arial", Font.PLAIN, 12));
+            t.setLineWrap(true);
+            t.setWrapStyleWord(true);
+            t.setEditable(false);
+            t.setBackground(Color.WHITE);
+            t.setBorder(null);
+            t.setAlignmentX(Component.LEFT_ALIGNMENT);
+            bodyPanel.add(t);
+        }
+
+        mainPanel.add(bodyPanel, BorderLayout.CENTER);
+
+        // Wrap in a scroll pane to handle smaller windows
+        JScrollPane scrollPane = new JScrollPane(mainPanel);
+        scrollPane.setBorder(null);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+        JPanel container = new JPanel(new BorderLayout());
+        container.setBackground(Color.WHITE);
+        container.add(scrollPane, BorderLayout.CENTER);
+        return container;
     }
 }
