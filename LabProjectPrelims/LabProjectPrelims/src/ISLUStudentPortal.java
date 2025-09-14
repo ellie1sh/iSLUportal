@@ -497,6 +497,9 @@ public class ISLUStudentPortal extends JFrame {
             case "📋 Transcript of Records":
                 contentPanel.add(createTranscriptOfRecordsPanel());
                 break;
+            case "ℹ️ Downloadable/ About iSLU":
+                contentPanel.add(createDownloadablesPanel(item.getSubItems()));
+                break;
             default:
                 // Fallback for any other menu item with a sublist
                 showGenericContent(item.getName());
@@ -688,6 +691,118 @@ public class ISLUStudentPortal extends JFrame {
                     LocalTime.of(15, 30), LocalTime.of(17, 30), "TH", "D221"));
         }
         return sampleCourses;
+    }
+
+    private JPanel createDownloadablesPanel(LinkedList<String> subItems) {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createTitledBorder("Downloadables / About iSLU"));
+
+        // Header with student and semester info
+        JPanel header = new JPanel(new BorderLayout());
+        header.setBackground(Color.WHITE);
+        header.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        JLabel left = new JLabel(studentName + " (" + studentID + ")");
+        left.setFont(new Font("Arial", Font.BOLD, 14));
+        JLabel right = new JLabel(semester);
+        right.setFont(new Font("Arial", Font.PLAIN, 12));
+        header.add(left, BorderLayout.WEST);
+        header.add(right, BorderLayout.EAST);
+        panel.add(header, BorderLayout.NORTH);
+
+        // Table of downloadable content using the same course source
+        String[] columnNames = subItems.toArray(new String[0]);
+
+        List<CourseScheduleItem> courses = getSampleCourses();
+        Object[][] data = new Object[courses.size()][columnNames.length];
+        for (int i = 0; i < courses.size(); i++) {
+            CourseScheduleItem c = courses.get(i);
+            data[i][0] = c.classCode;
+            data[i][1] = c.courseNumber;
+            data[i][2] = c.courseDescription;
+            data[i][3] = c.units;
+            data[i][4] = formatTime(c.startTime);
+            data[i][5] = formatTime(c.endTime);
+            data[i][6] = c.days;
+            data[i][7] = c.room;
+        }
+
+        DefaultTableModel model = new DefaultTableModel(data, columnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        JTable table = new JTable(model);
+        table.setRowHeight(26);
+        table.getTableHeader().setReorderingAllowed(false);
+        table.setAutoCreateRowSorter(true);
+        JScrollPane scrollPane = new JScrollPane(table);
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        // Export buttons
+        JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        JButton csvBtn = new JButton("Export CSV");
+        JButton jsonBtn = new JButton("Export JSON");
+        actions.add(csvBtn);
+        actions.add(jsonBtn);
+        actions.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
+        panel.add(actions, BorderLayout.SOUTH);
+
+        csvBtn.addActionListener(e -> exportCoursesAsCSV(courses));
+        jsonBtn.addActionListener(e -> exportCoursesAsJSON(courses));
+
+        return panel;
+    }
+
+    private void exportCoursesAsCSV(List<CourseScheduleItem> courses) {
+        File file = new File("Downloadables_Courses.csv");
+        try (PrintWriter pw = new PrintWriter(new FileWriter(file))) {
+            pw.println("Class Code,Course Number,Course Description,Units,Start Time,End Time,Days,Room");
+            for (CourseScheduleItem c : courses) {
+                pw.printf("%s,%s,\"%s\",%d,%s,%s,%s,%s%n",
+                        c.classCode,
+                        c.courseNumber,
+                        c.courseDescription.replace("\"", "'"),
+                        c.units,
+                        formatTime(c.startTime),
+                        formatTime(c.endTime),
+                        c.days,
+                        c.room);
+            }
+            JOptionPane.showMessageDialog(this, "CSV exported: " + file.getAbsolutePath());
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, "Failed to export CSV: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void exportCoursesAsJSON(List<CourseScheduleItem> courses) {
+        File file = new File("Downloadables_Courses.json");
+        try (PrintWriter pw = new PrintWriter(new FileWriter(file))) {
+            pw.println("[");
+            for (int i = 0; i < courses.size(); i++) {
+                CourseScheduleItem c = courses.get(i);
+                String obj = String.format("  {\"classCode\":\"%s\", \"courseNumber\":\"%s\", \"courseDescription\":\"%s\", \"units\":%d, \"startTime\":\"%s\", \"endTime\":\"%s\", \"days\":\"%s\", \"room\":\"%s\" }",
+                        escapeJson(c.classCode),
+                        escapeJson(c.courseNumber),
+                        escapeJson(c.courseDescription),
+                        c.units,
+                        escapeJson(formatTime(c.startTime)),
+                        escapeJson(formatTime(c.endTime)),
+                        escapeJson(c.days),
+                        escapeJson(c.room));
+                if (i < courses.size() - 1) obj += ",";
+                pw.println(obj);
+            }
+            pw.println("]");
+            JOptionPane.showMessageDialog(this, "JSON exported: " + file.getAbsolutePath());
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, "Failed to export JSON: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private static String escapeJson(String s) {
+        if (s == null) return "";
+        return s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n");
     }
     // method for attendance Content
     private Component showAttendanceContent(LinkedList<String> subItems) {
@@ -1044,6 +1159,14 @@ public class ISLUStudentPortal extends JFrame {
     // TO DO
     private LinkedList<String> createDownloadableSubList(){
         LinkedList<String> downloadableSubList = new LinkedList<>();
+        downloadableSubList.add("Class Code");
+        downloadableSubList.add("Course Number");
+        downloadableSubList.add("Course Description");
+        downloadableSubList.add("Units");
+        downloadableSubList.add("Start Time");
+        downloadableSubList.add("End Time");
+        downloadableSubList.add("Days");
+        downloadableSubList.add("Room");
         return downloadableSubList;
     }
 
