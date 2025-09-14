@@ -273,8 +273,8 @@ public class Login extends JFrame {
         boolean isValid = DataManager.authenticateUser(enteredID, enteredPassword);
         
         if (!isValid) {
-            // Check if database file exists
-            File databaseFile = new File("Database.txt");
+            // Check if database file exists using the same path as DataManager
+            File databaseFile = new File("../Database.txt");
             if (!databaseFile.exists()) {
                 JOptionPane.showMessageDialog(this, 
                     "Database not found. Please contact administrator.", 

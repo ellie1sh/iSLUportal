@@ -7,10 +7,10 @@ import java.util.*;
  */
 public class DataManager {
     
-    // File paths
-    private static final String DATABASE_FILE = "Database.txt";
-    private static final String USER_PASSWORD_FILE = "UserPasswordID.txt";
-    private static final String PAYMENT_LOGS_FILE = "paymentLogs.txt";
+    // File paths - adjusted to work from src directory
+    private static final String DATABASE_FILE = "../Database.txt";
+    private static final String USER_PASSWORD_FILE = "../UserPasswordID.txt";
+    private static final String PAYMENT_LOGS_FILE = "../paymentLogs.txt";
     
     /**
      * Authenticates user credentials against the database
@@ -21,14 +21,26 @@ public class DataManager {
     public static boolean authenticateUser(String studentID, String password) {
         try {
             File databaseFile = new File(DATABASE_FILE);
+            
             if (!databaseFile.exists()) {
+                System.err.println("Database file not found at: " + databaseFile.getAbsolutePath());
                 return false;
             }
-
+            
             try (BufferedReader reader = new BufferedReader(new FileReader(databaseFile))) {
                 String line;
+                int lineNumber = 0;
                 while ((line = reader.readLine()) != null) {
+                    lineNumber++;
+                    line = line.trim();
+                    
+                    // Skip empty lines
+                    if (line.isEmpty()) {
+                        continue;
+                    }
+                    
                     String[] parts = line.split(",");
+                    
                     if (parts.length >= 6) {
                         String storedID = parts[0].trim();
                         String storedPassword = parts[5].trim();
@@ -36,9 +48,12 @@ public class DataManager {
                         if (studentID.equals(storedID) && password.equals(storedPassword)) {
                             return true;
                         }
+                    } else {
+                        System.err.println("Warning: Database line " + lineNumber + " has insufficient data fields (" + parts.length + " fields)");
                     }
                 }
             }
+            
         } catch (IOException e) {
             System.err.println("Error reading database: " + e.getMessage());
         }
@@ -55,12 +70,18 @@ public class DataManager {
         try {
             File databaseFile = new File(DATABASE_FILE);
             if (!databaseFile.exists()) {
+                System.err.println("Database file not found at: " + databaseFile.getAbsolutePath());
                 return null;
             }
 
             try (BufferedReader reader = new BufferedReader(new FileReader(databaseFile))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
+                    line = line.trim();
+                    if (line.isEmpty()) {
+                        continue;
+                    }
+                    
                     String[] parts = line.split(",");
                     if (parts.length >= 6) {
                         String storedID = parts[0].trim();
@@ -80,6 +101,7 @@ public class DataManager {
             }
         } catch (IOException e) {
             System.err.println("Error reading database: " + e.getMessage());
+            e.printStackTrace();
         }
         
         return null;
