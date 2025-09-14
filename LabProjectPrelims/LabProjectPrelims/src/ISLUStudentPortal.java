@@ -500,6 +500,9 @@ public class ISLUStudentPortal extends JFrame {
             case "📋 Transcript of Records":
                 contentPanel.add(createTranscriptOfRecordsPanel());
                 break;
+            case "✅ Curriculum Checklist":
+                contentPanel.add(createCurriculumChecklistPanel());
+                break;
             case "ℹ️ Downloadable/ About iSLU":
                 contentPanel.add(createAboutISLUPanel());
                 break;
@@ -1103,7 +1106,6 @@ public class ISLUStudentPortal extends JFrame {
         LinkedList<String> TORSubList = new LinkedList<>();
         return TORSubList;
     }
-    // TO DO
     private LinkedList<String> createCurriculumChecklistSubList(){
         LinkedList<String> CurriculumChecklistSubList = new LinkedList<>();
         return CurriculumChecklistSubList;
@@ -2252,5 +2254,242 @@ public class ISLUStudentPortal extends JFrame {
             "Medical Clinic",
             "Technology Management and Development Department"
         };
+    }
+
+    /**
+     * Creates the Curriculum Checklist panel matching the UI design from the image
+     */
+    private JPanel createCurriculumChecklistPanel() {
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(new Color(240, 240, 240));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Content panel
+        JPanel contentPanel = new JPanel(new BorderLayout());
+        contentPanel.setBackground(Color.WHITE);
+        contentPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(0, 0, 0, 0)
+        ));
+
+        // Header - Curriculum Checklist
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(new Color(10, 45, 90));
+        headerPanel.setPreferredSize(new Dimension(0, 80));
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        
+        // Header content
+        JPanel headerContent = new JPanel();
+        headerContent.setLayout(new BoxLayout(headerContent, BoxLayout.Y_AXIS));
+        headerContent.setBackground(new Color(10, 45, 90));
+        
+        JLabel headerLabel = new JLabel("✅ BACHELOR OF SCIENCE IN INFORMATION TECHNOLOGY FIRST SEMESTER, 2018-2019");
+        headerLabel.setForeground(Color.WHITE);
+        headerLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        headerContent.add(headerLabel);
+        
+        // Note text
+        JLabel noteLabel = new JLabel("NOTE: For inquiries regarding your checklist please proceed to your respective Dean's offices.");
+        noteLabel.setForeground(new Color(255, 204, 102));
+        noteLabel.setFont(new Font("Arial", Font.ITALIC, 12));
+        headerContent.add(Box.createVerticalStrut(5));
+        headerContent.add(noteLabel);
+        
+        headerPanel.add(headerContent, BorderLayout.WEST);
+        contentPanel.add(headerPanel, BorderLayout.NORTH);
+
+        // Create curriculum table
+        String[] columnNames = {"", "Course Number", "Course Description", "Units"};
+        
+        // Generate curriculum data matching the image
+        Object[][] curriculumData = generateCurriculumData();
+        
+        DefaultTableModel curriculumModel = new DefaultTableModel(curriculumData, columnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Make all cells non-editable
+            }
+            
+            @Override
+            public Class<?> getColumnClass(int columnIndex) {
+                if (columnIndex == 0) {
+                    return Boolean.class; // For checkboxes
+                }
+                return String.class;
+            }
+        };
+
+        JTable curriculumTable = new JTable(curriculumModel);
+        curriculumTable.setRowHeight(25);
+        curriculumTable.getTableHeader().setReorderingAllowed(false);
+        curriculumTable.setAutoCreateRowSorter(false);
+        curriculumTable.setShowGrid(true);
+        curriculumTable.setGridColor(new Color(200, 200, 200));
+        curriculumTable.setFont(new Font("Arial", Font.PLAIN, 11));
+        
+        // Set column widths
+        curriculumTable.getColumnModel().getColumn(0).setPreferredWidth(30);  // Checkbox
+        curriculumTable.getColumnModel().getColumn(0).setMaxWidth(30);
+        curriculumTable.getColumnModel().getColumn(1).setPreferredWidth(100); // Course Number
+        curriculumTable.getColumnModel().getColumn(2).setPreferredWidth(500); // Description
+        curriculumTable.getColumnModel().getColumn(3).setPreferredWidth(50);  // Units
+        
+        // Style the table header
+        curriculumTable.getTableHeader().setBackground(new Color(220, 220, 220));
+        curriculumTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        
+        // Custom renderer for semester headers (bold rows with no checkbox)
+        curriculumTable.setDefaultRenderer(String.class, new javax.swing.table.DefaultTableCellRenderer() {
+            @Override
+            public java.awt.Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                
+                // Check if this is a semester header row (no course number)
+                Object courseNum = table.getValueAt(row, 1);
+                if (courseNum == null || courseNum.toString().trim().isEmpty()) {
+                    setFont(new Font("Arial", Font.BOLD, 12));
+                    setBackground(new Color(240, 240, 240));
+                    setHorizontalAlignment(SwingConstants.LEFT);
+                } else {
+                    setFont(new Font("Arial", Font.PLAIN, 11));
+                    setBackground(Color.WHITE);
+                    if (column == 3) { // Units column
+                        setHorizontalAlignment(SwingConstants.CENTER);
+                    } else {
+                        setHorizontalAlignment(SwingConstants.LEFT);
+                    }
+                }
+                
+                return this;
+            }
+        });
+
+        JScrollPane scrollPane = new JScrollPane(curriculumTable);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        contentPanel.add(scrollPane, BorderLayout.CENTER);
+
+        mainPanel.add(contentPanel, BorderLayout.CENTER);
+        return mainPanel;
+    }
+
+    /**
+     * Generates curriculum data matching the BSIT curriculum from the image
+     */
+    private Object[][] generateCurriculumData() {
+        java.util.List<Object[]> data = new java.util.ArrayList<>();
+        
+        // First Year, First Semester
+        data.add(new Object[]{null, "", "First Year, First Semester", ""});
+        data.add(new Object[]{true, "CFE 101", "GOD'S JOURNEY WITH HIS PEOPLE", "3"});
+        data.add(new Object[]{true, "FIT HW", "PHYSICAL ACTIVITY TOWARDS HEALTH AND FITNESS (HEALTH AND WELLNESS)", "2"});
+        data.add(new Object[]{true, "GART", "ART APPRECIATION", "3"});
+        data.add(new Object[]{true, "GHIST", "READINGS IN PHILIPPINE HISTORY", "3"});
+        data.add(new Object[]{true, "GSELF", "UNDERSTANDING THE SELF", "3"});
+        data.add(new Object[]{true, "IT 111", "INTRODUCTION TO COMPUTING (LEC)", "2"});
+        data.add(new Object[]{true, "IT 111L", "INTRODUCTION TO COMPUTING (LAB)", "1"});
+        data.add(new Object[]{true, "IT 112", "COMPUTER PROGRAMMING 1 (LEC)", "2"});
+        data.add(new Object[]{true, "IT 112L", "COMPUTER PROGRAMMING 1 (LAB)", "1"});
+        data.add(new Object[]{true, "IT 113", "DISCRETE MATHEMATICS", "3"});
+        
+        // First Year, Second Semester
+        data.add(new Object[]{null, "", "First Year, Second Semester", ""});
+        data.add(new Object[]{true, "CFE 102", "CHRISTIAN MORALITY IN OUR TIMES", "3"});
+        data.add(new Object[]{true, "FIT CS", "PHYSICAL ACTIVITY TOWARDS HEALTH AND FITNESS (COMBATIVE SPORTS)", "2"});
+        data.add(new Object[]{true, "GCWORLD", "THE CONTEMPORARY WORLD", "3"});
+        data.add(new Object[]{true, "GMATH", "MATHEMATICS IN THE MODERN WORLD", "3"});
+        data.add(new Object[]{true, "GPCOM", "PURPOSIVE COMMUNICATION", "3"});
+        data.add(new Object[]{true, "IT 121", "INFORMATION SYSTEM FUNDAMENTALS", "3"});
+        data.add(new Object[]{true, "IT 122", "COMPUTER PROGRAMMING 2", "2"});
+        data.add(new Object[]{true, "IT 122L", "COMPUTER PROGRAMMING 2 (LAB)", "1"});
+        data.add(new Object[]{true, "IT 123", "PLATFORM TECHNOLOGIES", "2"});
+        data.add(new Object[]{true, "IT 123L", "PLATFORM TECHNOLOGIES (LAB)", "1"});
+        
+        // First Year, Short Term
+        data.add(new Object[]{null, "", "First Year, Short Term", ""});
+        data.add(new Object[]{true, "GRIZAL", "THE LIFE AND WORKS OF RIZAL", "3"});
+        data.add(new Object[]{true, "IT 131", "COMPUTER ARCHITECTURE", "2"});
+        data.add(new Object[]{true, "IT 131L", "COMPUTER ARCHITECTURE (LAB)", "1"});
+        
+        // Second Year, First Semester
+        data.add(new Object[]{null, "", "Second Year, First Semester", ""});
+        data.add(new Object[]{false, "CFE 103", "CATHOLIC FOUNDATION OF MISSION", "3"});
+        data.add(new Object[]{false, "FIT OA", "PHYSICAL ACTIVITY TOWARDS HEALTH AND FITNESS (OUTDOOR AND ADVENTURE ACTIVITIES)", "2"});
+        data.add(new Object[]{false, "GENVI", "ENVIRONMENTAL SCIENCE", "3"});
+        data.add(new Object[]{false, "GSTS", "SCIENCE, TECHNOLOGY, AND SOCIETY", "3"});
+        data.add(new Object[]{false, "IT 211", "REQUIREMENTS ANALYSIS AND MODELING", "3"});
+        data.add(new Object[]{false, "IT 212", "DATA STRUCTURES (LEC)", "2"});
+        data.add(new Object[]{false, "IT 212L", "DATA STRUCTURES (LAB)", "1"});
+        data.add(new Object[]{false, "IT 213", "NETWORK FUNDAMENTALS (LEC)", "2"});
+        data.add(new Object[]{false, "IT 213L", "NETWORK FUNDAMENTALS (LAB)", "1"});
+        data.add(new Object[]{false, "NSTP-CWTS 1", "FOUNDATIONS OF SERVICE", "3"});
+        
+        // Second Year, Second Semester
+        data.add(new Object[]{null, "", "Second Year, Second Semester", ""});
+        data.add(new Object[]{false, "CFE 104", "CICM MISSIONARY IDENTITY", "3"});
+        data.add(new Object[]{false, "FIT AQ", "PHYSICAL ACTIVITY TOWARDS HEALTH AND FITNESS (AQUATICS)", "2"});
+        data.add(new Object[]{false, "GENTREP", "THE ENTREPRENEURIAL MIND", "3"});
+        data.add(new Object[]{false, "GRVA", "READING VISUAL ART", "3"});
+        data.add(new Object[]{false, "IT 221", "INFORMATION MANAGEMENT (LEC)", "2"});
+        data.add(new Object[]{false, "IT 221L", "INFORMATION MANAGEMENT (LAB)", "1"});
+        data.add(new Object[]{false, "IT 222", "INTEGRATIVE TECHNOLOGIES (LEC)", "2"});
+        data.add(new Object[]{false, "IT 222L", "INTEGRATIVE TECHNOLOGIES (LAB)", "1"});
+        data.add(new Object[]{false, "IT 223", "HUMAN COMPUTER INTERACTION", "3"});
+        data.add(new Object[]{false, "NSTP-CWTS 2", "SOCIAL AWARENESS AND EMPOWERMENT FOR SERVICE", "3"});
+        
+        // Second Year, Short Term
+        data.add(new Object[]{null, "", "Second Year, Short Term", ""});
+        data.add(new Object[]{false, "CS 314", "SOCIAL AND PERSONAL DEVELOPMENT IN THE ICT WORKPLACE", "3"});
+        data.add(new Object[]{false, "CS 315", "TECHNOLOGY-ASSISTED PRESENTATION AND COMMUNICATION", "3"});
+        data.add(new Object[]{false, "GETHICS", "ETHICS", "3"});
+        
+        // Third Year, First Semester
+        data.add(new Object[]{null, "", "Third Year, First Semester", ""});
+        data.add(new Object[]{false, "CFE 105A", "CICM IN ACTION: JUSTICE, PEACE, INTEGRITY OF CREATION, INDIGENOUS PEOPLES & INTERRELIGIOUS DIALOGUE", "1.5"});
+        data.add(new Object[]{false, "IT 311", "APPLICATIONS DEVELOPMENT (LEC)", "2"});
+        data.add(new Object[]{false, "IT 311L", "APPLICATIONS DEVELOPMENT (LAB)", "1"});
+        data.add(new Object[]{false, "IT 312", "WEB TECHNOLOGIES (LEC)", "2"});
+        data.add(new Object[]{false, "IT 312L", "WEB TECHNOLOGIES (LAB)", "1"});
+        data.add(new Object[]{false, "IT 313", "SOFTWARE ENGINEERING", "3"});
+        data.add(new Object[]{false, "IT 314", "SOCIAL AND PROFESSIONAL ISSUES IN INFORMATION TECHNOLOGY", "3"});
+        data.add(new Object[]{false, "IT 315", "TECHNOPRENEURSHIP", "3"});
+        data.add(new Object[]{false, "ITE 15", "IT SECURITY MANAGEMENT (Elective)", "3"});
+        data.add(new Object[]{false, "ITE 23", "ELECTRONIC COMMERCE (Elective)", "3"});
+        data.add(new Object[]{false, "ITE 30", "INFORMATION TECHNOLOGY CERTIFICATION REVIEW (Elective)", "3"});
+        
+        // Third Year, Second Semester
+        data.add(new Object[]{null, "", "Third Year, Second Semester", ""});
+        data.add(new Object[]{false, "CFE 105B", "CICM IN ACTION: ENVIRONMENTAL PLANNING & MANAGEMENT, AND DISASTER RISK REDUCTION MANAGEMENT", "1.5"});
+        data.add(new Object[]{false, "IT 321", "IT PROJECT 1", "3"});
+        data.add(new Object[]{false, "IT 322", "DATA ANALYTICS (LEC)", "2"});
+        data.add(new Object[]{false, "IT 322L", "DATA ANALYTICS (LAB)", "1"});
+        data.add(new Object[]{false, "IT 323", "SYSTEM ADMINISTRATION AND MAINTENANCE (LEC)", "2"});
+        data.add(new Object[]{false, "IT 323L", "SYSTEM ADMINISTRATION AND MAINTENANCE (LAB)", "1"});
+        data.add(new Object[]{false, "IT 324", "SYSTEM INTEGRATION AND ARCHITECTURE", "3"});
+        data.add(new Object[]{false, "IT 325", "FIELD TRIPS AND SEMINARS", "3"});
+        data.add(new Object[]{false, "ITE 16", "CURRENT TRENDS 1 (Elective)", "3"});
+        data.add(new Object[]{false, "ITE 27", "CURRENT TRENDS 2 (Elective)", "3"});
+        data.add(new Object[]{false, "ITE 29", "SPECIAL TOPICS 2 (Elective)", "3"});
+        
+        // Third Year, Short Term
+        data.add(new Object[]{null, "", "Third Year, Short Term", ""});
+        data.add(new Object[]{false, "IT 331", "INFORMATION ASSURANCE AND SECURITY", "3"});
+        data.add(new Object[]{false, "ITE 17", "DATA MINING (LEC)", "2"});
+        data.add(new Object[]{false, "ITE 17L", "DATA MINING (LAB)", "1"});
+        
+        // Fourth Year, First Semester
+        data.add(new Object[]{null, "", "Fourth Year, First Semester", ""});
+        data.add(new Object[]{false, "CFE 106A", "EMBRACING THE CICM MISSION", "1.5"});
+        data.add(new Object[]{false, "FOR LANG 1", "FOREIGN LANGUAGE 1", "3"});
+        data.add(new Object[]{false, "IT 411", "IT PROJECT 2", "3"});
+        data.add(new Object[]{false, "IT 412", "IT RESOURCE MANAGEMENT", "3"});
+        data.add(new Object[]{false, "ITE 14", "UX CONCEPTS AND DESIGN (Elective)", "3"});
+        data.add(new Object[]{false, "ITE 28", "SPECIAL TOPICS 1 (Elective)", "3"});
+        
+        // Fourth Year, Second Semester
+        data.add(new Object[]{null, "", "Fourth Year, Second Semester", ""});
+        data.add(new Object[]{false, "CFE 106B", "EMBRACING THE CICM MISSION", "1.5"});
+        data.add(new Object[]{false, "IT 421", "PRACTICUM", "9"});
+        
+        return data.toArray(new Object[data.size()][4]);
     }
 }
