@@ -1,6 +1,7 @@
 import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -500,6 +501,9 @@ public class ISLUStudentPortal extends JFrame {
             case "📋 Transcript of Records":
                 contentPanel.add(createTranscriptOfRecordsPanel());
                 break;
+            case "✅ Curriculum Checklist":
+                contentPanel.add(createCurriculumChecklistPanel());
+                break;
             case "ℹ️ Downloadable/ About iSLU":
                 contentPanel.add(createAboutISLUPanel());
                 break;
@@ -510,6 +514,245 @@ public class ISLUStudentPortal extends JFrame {
         contentPanel.revalidate();
         contentPanel.repaint();
 
+    }
+
+    /**
+     * Creates the Curriculum Checklist panel matching the provided reference layout
+     */
+    private JPanel createCurriculumChecklistPanel() {
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(Color.WHITE);
+
+        // Top header bar
+        JPanel header = new JPanel(new BorderLayout());
+        header.setBackground(new Color(13, 37, 73));
+        header.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
+        JLabel headerLabel = new JLabel("BACHELOR OF SCIENCE IN INFORMATION TECHNOLOGY FIRST SEMESTER, 2018-2019");
+        headerLabel.setForeground(Color.WHITE);
+        headerLabel.setFont(new Font("Arial", Font.BOLD, 13));
+        header.add(headerLabel, BorderLayout.WEST);
+        mainPanel.add(header, BorderLayout.NORTH);
+
+        // Center content container
+        JPanel center = new JPanel(new BorderLayout());
+        center.setBackground(Color.WHITE);
+        center.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // Note label
+        JLabel note = new JLabel("NOTE: For inquiries regarding your checklist please proceed to your respective Dean's offices.");
+        note.setForeground(new Color(180, 0, 0));
+        note.setFont(new Font("Arial", Font.PLAIN, 12));
+        center.add(note, BorderLayout.NORTH);
+
+        // Table model and data
+        CurriculumTableModel model = new CurriculumTableModel(new String[]{"", "Course Number", "Course Description", "Units"});
+
+        // Build rows by sections (headers + items). All items are marked with check icon.
+        // First Year, First Semester
+        model.addHeaderRow("First Year, First Semester");
+        model.addCourseRow("CFE 101", "GOD'S JOURNEY WITH HIS PEOPLE", 3);
+        model.addCourseRow("FIT HW", "PHYSICAL ACTIVITY TOWARDS HEALTH AND FITNESS (HEALTH AND WELLNESS)", 2);
+        model.addCourseRow("GART", "ART APPRECIATION", 3);
+        model.addCourseRow("GHIST", "READINGS IN PHILIPPINE HISTORY", 3);
+        model.addCourseRow("GSELF", "UNDERSTANDING THE SELF", 3);
+        model.addCourseRow("IT 111", "INTRODUCTION TO COMPUTING (LEC)", 2);
+        model.addCourseRow("IT 111L", "INTRODUCTION TO COMPUTING (LAB)", 1);
+        model.addCourseRow("IT 112", "COMPUTER PROGRAMMING 1 (LEC)", 2);
+        model.addCourseRow("IT 112L", "COMPUTER PROGRAMMING 1 (LAB)", 1);
+        model.addCourseRow("IT 113", "DISCRETE MATHEMATICS", 3);
+
+        // First Year, Second Semester
+        model.addHeaderRow("First Year, Second Semester");
+        model.addCourseRow("CFE 102", "CHRISTIAN MORALITY IN OUR TIMES", 3);
+        model.addCourseRow("FIT CS", "PHYSICAL ACTIVITY TOWARDS HEALTH AND FITNESS (COMBATIVE SPORTS)", 2);
+        model.addCourseRow("GCWORLD", "THE CONTEMPORARY WORLD", 3);
+        model.addCourseRow("GMATH", "MATHEMATICS IN THE MODERN WORLD", 3);
+        model.addCourseRow("GPCOM", "PURPOSIVE COMMUNICATION", 3);
+        model.addCourseRow("IT 121", "INFORMATION SYSTEM FUNDAMENTALS", 3);
+        model.addCourseRow("IT 122", "COMPUTER PROGRAMMING 2", 2);
+        model.addCourseRow("IT 122L", "COMPUTER PROGRAMMING 2 (LAB)", 1);
+        model.addCourseRow("IT 123", "PLATFORM TECHNOLOGIES", 2);
+        model.addCourseRow("IT 123L", "PLATFORM TECHNOLOGIES (LAB)", 1);
+
+        // First Year, Short Term
+        model.addHeaderRow("First Year, Short Term");
+        model.addCourseRow("GRIZAL", "THE LIFE AND WORKS OF RIZAL", 3);
+        model.addCourseRow("IT 131", "COMPUTER ARCHITECTURE", 2);
+        model.addCourseRow("IT 131L", "COMPUTER ARCHITECTURE (LAB)", 1);
+
+        // Second Year, First Semester
+        model.addHeaderRow("Second Year, First Semester");
+        model.addCourseRow("CFE 103", "CATHOLIC FOUNDATION OF MISSION", 3);
+        model.addCourseRow("FIT OA", "PHYSICAL ACTIVITY TOWARDS HEALTH AND FITNESS (OUTDOOR AND ADVENTURE ACTIVITIES)", 2);
+        model.addCourseRow("GENVI", "ENVIRONMENTAL SCIENCE", 3);
+        model.addCourseRow("GSTS", "SCIENCE, TECHNOLOGY, AND SOCIETY", 3);
+        model.addCourseRow("IT 211", "REQUIREMENTS ANALYSIS AND MODELING", 3);
+        model.addCourseRow("IT 212", "DATA STRUCTURES (LEC)", 2);
+        model.addCourseRow("IT 212L", "DATA STRUCTURES (LAB)", 1);
+        model.addCourseRow("IT 213", "NETWORK FUNDAMENTALS (LEC)", 2);
+        model.addCourseRow("IT 213L", "NETWORK FUNDAMENTALS (LAB)", 1);
+        model.addCourseRow("NSTP-CWTS 1", "FOUNDATIONS OF SERVICE", 3);
+
+        // Second Year, Second Semester
+        model.addHeaderRow("Second Year, Second Semester");
+        model.addCourseRow("CFE 104", "CICM MISSIONARY IDENTITY", 3);
+        model.addCourseRow("FIT AQ", "PHYSICAL ACTIVITY TOWARDS HEALTH AND FITNESS (AQUATICS)", 2);
+        model.addCourseRow("GENTREP", "THE ENTREPRENEURIAL MIND", 3);
+        model.addCourseRow("GRVA", "READING VISUAL ART", 3);
+        model.addCourseRow("IT 221", "INFORMATION MANAGEMENT (LEC)", 2);
+        model.addCourseRow("IT 221L", "INFORMATION MANAGEMENT (LAB)", 1);
+        model.addCourseRow("IT 222", "INTEGRATIVE TECHNOLOGIES (LEC)", 2);
+        model.addCourseRow("IT 222L", "INTEGRATIVE TECHNOLOGIES (LAB)", 1);
+        model.addCourseRow("IT 225", "HUMAN COMPUTER INTERACTION", 3);
+        model.addCourseRow("NSTP-CWTS 2", "SOCIAL AWARENESS AND EMPOWERMENT FOR SERVICE", 3);
+
+        // Second Year, Short Term
+        model.addHeaderRow("Second Year, Short Term");
+        model.addCourseRow("CS 314", "SOCIAL AND PERSONAL DEVELOPMENT IN THE ICT WORKPLACE", 3);
+        model.addCourseRow("CS 315", "TECHNOLOGY-ASSISTED PRESENTATION AND COMMUNICATION", 3);
+        model.addCourseRow("GETHICS", "ETHICS", 3);
+
+        // Third Year, First Semester
+        model.addHeaderRow("Third Year, First Semester");
+        model.addCourseRow("CFE 105A", "CICM IN ACTION: JUSTICE, PEACE, INTEGRITY OF CREATION, INDIGENOUS PEOPLES & INTERRELIGIOUS DIALOGUE", 1);
+        model.addCourseRow("IT 311", "APPLICATIONS DEVELOPMENT (LEC)", 2);
+        model.addCourseRow("IT 311L", "APPLICATIONS DEVELOPMENT (LAB)", 1);
+        model.addCourseRow("IT 312", "WEB TECHNOLOGIES (LEC)", 2);
+        model.addCourseRow("IT 312L", "WEB TECHNOLOGIES (LAB)", 1);
+        model.addCourseRow("IT 313", "SOFTWARE ENGINEERING", 3);
+        model.addCourseRow("IT 314", "SOCIAL AND PROFESSIONAL ISSUES IN INFORMATION TECHNOLOGY", 3);
+        model.addCourseRow("IT 315", "TECHNOPRENEURSHIP", 3);
+        model.addCourseRow("ITE 15", "IT SECURITY MANAGEMENT (Elective)", 3);
+        model.addCourseRow("ITE 23", "ELECTRONIC COMMERCE (Elective)", 3);
+        model.addCourseRow("ITE 30", "INFORMATION TECHNOLOGY CERTIFICATION REVIEW (Elective)", 3);
+
+        // Third Year, Second Semester
+        model.addHeaderRow("Third Year, Second Semester");
+        model.addCourseRow("CFE 105B", "CICM IN ACTION: ENVIRONMENTAL PLANNING & MANAGEMENT, AND DISASTER RISK REDUCTION MANAGEMENT", 1);
+        model.addCourseRow("IT 321", "IT PROJECT 1", 3);
+        model.addCourseRow("IT 322", "DATA ANALYTICS (LEC)", 2);
+        model.addCourseRow("IT 322L", "DATA ANALYTICS (LAB)", 1);
+        model.addCourseRow("IT 323", "SYSTEM ADMINISTRATION AND MAINTENANCE (LEC)", 2);
+        model.addCourseRow("IT 323L", "SYSTEM ADMINISTRATION AND MAINTENANCE (LAB)", 1);
+        model.addCourseRow("IT 324", "SYSTEM INTEGRATION AND ARCHITECTURE", 3);
+        model.addCourseRow("IT 325", "FIELD TRIPS AND SEMINARS", 3);
+        model.addCourseRow("ITE 26", "CURRENT TRENDS 1 (Elective)", 3);
+        model.addCourseRow("ITE 27", "CURRENT TRENDS 2 (Elective)", 3);
+        model.addCourseRow("ITE 29", "SPECIAL TOPICS 2 (Elective)", 3);
+
+        // Third Year, Short Term
+        model.addHeaderRow("Third Year, Short Term");
+        model.addCourseRow("IT 331", "INFORMATION ASSURANCE AND SECURITY", 3);
+        model.addCourseRow("ITE 17", "DATA MINING (LEC)", 2);
+        model.addCourseRow("ITE 17L", "DATA MINING (LAB)", 1);
+
+        // Fourth Year, First Semester
+        model.addHeaderRow("Fourth Year, First Semester");
+        model.addCourseRow("CFE 106A", "EMBRACING THE CICM MISSION", 1);
+        model.addCourseRow("FOR LANG 1", "FOREIGN LANGUAGE 1", 3);
+        model.addCourseRow("IT 411", "IT PROJECT 2", 3);
+        model.addCourseRow("IT 412", "IT RESOURCE MANAGEMENT", 3);
+        model.addCourseRow("ITE 14", "UX CONCEPTS AND DESIGN (Elective)", 3);
+        model.addCourseRow("ITE 28", "SPECIAL TOPICS 1 (Elective)", 3);
+
+        // Fourth Year, Second Semester
+        model.addHeaderRow("Fourth Year, Second Semester");
+        model.addCourseRow("CFE 106B", "EMBRACING THE CICM MISSION", 1);
+        model.addCourseRow("IT 421", "PRACTICUM", 9);
+
+        JTable table = new JTable(model);
+        table.setRowHeight(28);
+        table.setFillsViewportHeight(true);
+        table.getTableHeader().setReorderingAllowed(false);
+        table.setShowGrid(true);
+        table.setGridColor(new Color(220, 220, 220));
+        table.setFont(new Font("Arial", Font.PLAIN, 12));
+        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+
+        // Renderers
+        DefaultTableCellRenderer sectionAware = new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable tbl, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                super.getTableCellRendererComponent(tbl, value, isSelected, hasFocus, row, column);
+                CurriculumTableModel m = (CurriculumTableModel) tbl.getModel();
+                if (m.isHeaderRow(row)) {
+                    setFont(getFont().deriveFont(Font.BOLD));
+                    setBackground(new Color(245, 245, 245));
+                    setHorizontalAlignment(LEFT);
+                    if (column == 1) {
+                        setText(value == null ? "" : value.toString());
+                    } else {
+                        setText("");
+                    }
+                } else {
+                    setFont(new Font("Arial", Font.PLAIN, 12));
+                    setBackground(Color.WHITE);
+                    setHorizontalAlignment(column == 3 ? RIGHT : LEFT);
+                }
+                return this;
+            }
+        };
+
+        DefaultTableCellRenderer checkRenderer = new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable tbl, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                super.getTableCellRendererComponent(tbl, value, isSelected, hasFocus, row, column);
+                CurriculumTableModel m = (CurriculumTableModel) tbl.getModel();
+                setHorizontalAlignment(CENTER);
+                if (m.isHeaderRow(row)) {
+                    setText("");
+                } else {
+                    setForeground(new Color(34, 139, 34));
+                    setText("✔");
+                }
+                setBackground(m.isHeaderRow(row) ? new Color(245, 245, 245) : Color.WHITE);
+                return this;
+            }
+        };
+
+        table.getColumnModel().getColumn(0).setPreferredWidth(30);
+        table.getColumnModel().getColumn(0).setMaxWidth(40);
+        table.getColumnModel().getColumn(0).setCellRenderer(checkRenderer);
+        table.getColumnModel().getColumn(1).setPreferredWidth(150);
+        table.getColumnModel().getColumn(1).setCellRenderer(sectionAware);
+        table.getColumnModel().getColumn(2).setCellRenderer(sectionAware);
+        table.getColumnModel().getColumn(3).setPreferredWidth(60);
+        table.getColumnModel().getColumn(3).setMaxWidth(80);
+        table.getColumnModel().getColumn(3).setCellRenderer(sectionAware);
+
+        JScrollPane scroll = new JScrollPane(table);
+        scroll.setBorder(BorderFactory.createEmptyBorder());
+        center.add(scroll, BorderLayout.CENTER);
+
+        mainPanel.add(center, BorderLayout.CENTER);
+        return mainPanel;
+    }
+
+    // Lightweight table model to track section header rows
+    private static class CurriculumTableModel extends DefaultTableModel {
+        private final java.util.Set<Integer> headerRows = new java.util.HashSet<>();
+
+        CurriculumTableModel(String[] columns) {
+            super(columns, 0);
+        }
+
+        void addHeaderRow(String title) {
+            addRow(new Object[]{"", title, "", ""});
+            headerRows.add(getRowCount() - 1);
+        }
+
+        void addCourseRow(String code, String description, int units) {
+            addRow(new Object[]{"✔", code, description, units});
+        }
+
+        boolean isHeaderRow(int row) {
+            return headerRows.contains(row);
+        }
+
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            return false;
+        }
     }
     // Journal/Periodical Panel
     private JPanel createJournalPeriodicalPanel() {
