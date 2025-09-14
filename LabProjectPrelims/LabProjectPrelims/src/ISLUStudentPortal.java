@@ -497,6 +497,9 @@ public class ISLUStudentPortal extends JFrame {
             case "📋 Transcript of Records":
                 contentPanel.add(createTranscriptOfRecordsPanel());
                 break;
+            case "ℹ️ Downloadable/ About iSLU":
+                contentPanel.add(createAboutISLUPanel());
+                break;
             default:
                 // Fallback for any other menu item with a sublist
                 showGenericContent(item.getName());
@@ -1824,5 +1827,351 @@ public class ISLUStudentPortal extends JFrame {
                 super.insertString(0, formatted.toString(), a);
             }
         }
+    }
+
+    /**
+     * Creates the About iSLU panel with downloadables and overview sections
+     */
+    private JPanel createAboutISLUPanel() {
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(new Color(240, 240, 240));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Create scroll pane for the content
+        JPanel contentPanel = new JPanel();
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        contentPanel.setBackground(Color.WHITE);
+
+        // Add Downloadables section
+        JPanel downloadablesPanel = createDownloadablesSection();
+        contentPanel.add(downloadablesPanel);
+        contentPanel.add(Box.createVerticalStrut(20));
+
+        // Add About iSLU section
+        JPanel aboutPanel = createAboutISLUSection();
+        contentPanel.add(aboutPanel);
+
+        JScrollPane scrollPane = new JScrollPane(contentPanel);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setBorder(null);
+
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        return mainPanel;
+    }
+
+    /**
+     * Creates the downloadables section with all categories
+     */
+    private JPanel createDownloadablesSection() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(0, 0, 0, 0)
+        ));
+
+        // Header
+        JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        headerPanel.setBackground(new Color(52, 73, 94));
+        headerPanel.setPreferredSize(new Dimension(0, 50));
+        
+        JLabel headerIcon = new JLabel("📁");
+        headerIcon.setForeground(Color.WHITE);
+        headerIcon.setFont(new Font("Arial", Font.PLAIN, 20));
+        headerPanel.add(headerIcon);
+        
+        JLabel headerLabel = new JLabel("Downloadables");
+        headerLabel.setForeground(new Color(255, 204, 102));
+        headerLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        headerPanel.add(headerLabel);
+        
+        panel.add(headerPanel, BorderLayout.NORTH);
+
+        // Content with downloadable items
+        JPanel contentPanel = new JPanel();
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        contentPanel.setBackground(new Color(245, 245, 245));
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
+
+        // Add all downloadable categories
+        addDownloadableCategory(contentPanel, "General", createGeneralDownloadables());
+        addDownloadableCategory(contentPanel, "Center for Counseling and Wellness", createCounselingDownloadables());
+        addDownloadableCategory(contentPanel, "Other Student Services", createOtherServicesDownloadables());
+        addDownloadableCategory(contentPanel, "SAMCIS", createSAMCISDownloadables());
+        addDownloadableCategory(contentPanel, "SAS", createSASDownloadables());
+        addDownloadableCategory(contentPanel, "SEA", createSEADownloadables());
+        addDownloadableCategory(contentPanel, "SONAHBS", createSONAHBSDownloadables());
+        addDownloadableCategory(contentPanel, "SOM", createSOMDownloadables());
+        addDownloadableCategory(contentPanel, "STELA", createSTELADownloadables());
+        addDownloadableCategory(contentPanel, "Student Services Orientation", createStudentServicesDownloadables());
+
+        panel.add(contentPanel, BorderLayout.CENTER);
+        return panel;
+    }
+
+    /**
+     * Creates the About iSLU section
+     */
+    private JPanel createAboutISLUSection() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(0, 0, 0, 0)
+        ));
+
+        // Header
+        JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        headerPanel.setBackground(new Color(52, 73, 94));
+        headerPanel.setPreferredSize(new Dimension(0, 50));
+        
+        JLabel headerIcon = new JLabel("ℹ️");
+        headerIcon.setForeground(Color.WHITE);
+        headerIcon.setFont(new Font("Arial", Font.PLAIN, 20));
+        headerPanel.add(headerIcon);
+        
+        JLabel headerLabel = new JLabel("About iSLU");
+        headerLabel.setForeground(new Color(255, 204, 102));
+        headerLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        headerPanel.add(headerLabel);
+        
+        panel.add(headerPanel, BorderLayout.NORTH);
+
+        // Content
+        JPanel contentPanel = new JPanel();
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        contentPanel.setBackground(Color.WHITE);
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // OVERVIEW section
+        JLabel overviewTitle = new JLabel("OVERVIEW");
+        overviewTitle.setFont(new Font("Arial", Font.BOLD, 18));
+        overviewTitle.setForeground(Color.BLACK);
+        contentPanel.add(overviewTitle);
+        contentPanel.add(Box.createVerticalStrut(15));
+
+        // ABOUT ISLU PORTAL section
+        JLabel aboutPortalTitle = new JLabel("ABOUT ISLU PORTAL");
+        aboutPortalTitle.setFont(new Font("Arial", Font.BOLD, 14));
+        aboutPortalTitle.setForeground(Color.BLACK);
+        contentPanel.add(aboutPortalTitle);
+        contentPanel.add(Box.createVerticalStrut(8));
+
+        JTextArea aboutPortalText = new JTextArea();
+        aboutPortalText.setText("iSLU Portal is for Saint Louis University students and parents, that serves as a personal assistant in carrying out university-related tasks.\n\n" +
+                               "Students can view their personal details, schedules, current grades, accountabilities, curriculum checklist and more. Parents can also view these modules of their " +
+                               "children as long they register.");
+        aboutPortalText.setFont(new Font("Arial", Font.PLAIN, 12));
+        aboutPortalText.setLineWrap(true);
+        aboutPortalText.setWrapStyleWord(true);
+        aboutPortalText.setEditable(false);
+        aboutPortalText.setBackground(Color.WHITE);
+        aboutPortalText.setBorder(null);
+        contentPanel.add(aboutPortalText);
+        contentPanel.add(Box.createVerticalStrut(20));
+
+        // FEATURES AVAILABLE section
+        JLabel featuresTitle = new JLabel("FEATURES AVAILABLE");
+        featuresTitle.setFont(new Font("Arial", Font.BOLD, 14));
+        featuresTitle.setForeground(Color.BLACK);
+        contentPanel.add(featuresTitle);
+        contentPanel.add(Box.createVerticalStrut(8));
+
+        String[] features = {
+            "Personal Details: where a student can view his/her personal information.",
+            "Class Schedule: where a student can view his/her enrolled subjects of the current term.",
+            "Class Attendance: displays the absences of the student of the current term.",
+            "Current Grades: shows the Prelim, Mid-term and Tentative final grades of a student.",
+            "Transcript of Records: shows the final grades in the previous term of a student.",
+            "Statements of Accounts: shows if a student still has account balance from the accounting office.",
+            "Curriculum Checklist: shows the student's checklist of a curriculum chosen.",
+            "School Calendar: where a student can view the school events and no classes within an academic year."
+        };
+
+        for (String feature : features) {
+            JTextArea featureText = new JTextArea(feature);
+            featureText.setFont(new Font("Arial", Font.PLAIN, 12));
+            featureText.setLineWrap(true);
+            featureText.setWrapStyleWord(true);
+            featureText.setEditable(false);
+            featureText.setBackground(Color.WHITE);
+            featureText.setBorder(null);
+            contentPanel.add(featureText);
+            contentPanel.add(Box.createVerticalStrut(5));
+        }
+        contentPanel.add(Box.createVerticalStrut(15));
+
+        // HOW TO REGISTER section
+        JLabel registerTitle = new JLabel("HOW TO REGISTER? Or FORGOT USER ID Number and PASSWORD!");
+        registerTitle.setFont(new Font("Arial", Font.BOLD, 14));
+        registerTitle.setForeground(Color.BLACK);
+        contentPanel.add(registerTitle);
+        contentPanel.add(Box.createVerticalStrut(8));
+
+        JTextArea studentsText = new JTextArea();
+        studentsText.setText("STUDENTS: proceed to IT CENTER SOFTWARE DEVELOPMENT (MIS), 2nd floor, Burgos Administrative Center, Saint Louis University.");
+        studentsText.setFont(new Font("Arial", Font.PLAIN, 12));
+        studentsText.setLineWrap(true);
+        studentsText.setWrapStyleWord(true);
+        studentsText.setEditable(false);
+        studentsText.setBackground(Color.WHITE);
+        studentsText.setBorder(null);
+        contentPanel.add(studentsText);
+        contentPanel.add(Box.createVerticalStrut(8));
+
+        JTextArea parentsText = new JTextArea();
+        parentsText.setText("PARENTS/GUARDIANS: register at Registrar's office, Diego Silang building, Saint Louis University.");
+        parentsText.setFont(new Font("Arial", Font.PLAIN, 12));
+        parentsText.setLineWrap(true);
+        parentsText.setWrapStyleWord(true);
+        parentsText.setEditable(false);
+        parentsText.setBackground(Color.WHITE);
+        parentsText.setBorder(null);
+        contentPanel.add(parentsText);
+
+        panel.add(contentPanel, BorderLayout.CENTER);
+        return panel;
+    }
+
+    /**
+     * Helper method to add downloadable categories
+     */
+    private void addDownloadableCategory(JPanel parent, String categoryName, String[] items) {
+        // Category header
+        JLabel categoryLabel = new JLabel("• " + categoryName);
+        categoryLabel.setFont(new Font("Arial", Font.BOLD, 13));
+        categoryLabel.setForeground(Color.BLACK);
+        parent.add(categoryLabel);
+        parent.add(Box.createVerticalStrut(8));
+
+        // Category items
+        for (String item : items) {
+            JPanel itemPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 2));
+            itemPanel.setBackground(new Color(245, 245, 245));
+            
+            JLabel itemLabel = new JLabel("○ " + item.split("\\|")[0]);
+            itemLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+            itemLabel.setForeground(Color.BLACK);
+            itemPanel.add(itemLabel);
+            
+            JLabel downloadLink = new JLabel("[download]");
+            downloadLink.setFont(new Font("Arial", Font.PLAIN, 12));
+            downloadLink.setForeground(Color.RED);
+            downloadLink.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            downloadLink.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    JOptionPane.showMessageDialog(null, "Download functionality would be implemented here for: " + item.split("\\|")[0], 
+                                                "Download", JOptionPane.INFORMATION_MESSAGE);
+                }
+            });
+            itemPanel.add(downloadLink);
+            
+            parent.add(itemPanel);
+        }
+        parent.add(Box.createVerticalStrut(15));
+    }
+
+    // Helper methods to create downloadable items for each category
+    private String[] createGeneralDownloadables() {
+        return new String[]{
+            "Student Handbook",
+            "Safety Orientation Manual",
+            "Ordinance 021-2018 - Harassment",
+            "GGuide for Education",
+            "The Mission and Identity Cluster",
+            "Official List of Student Organizations",
+            "UNIVERSITY LIBRARIES",
+            "OSA Student Services Orientation",
+            "KASAMA SSC Orientation",
+            "Feeling at Home in SLU",
+            "Health and Safety Protocols re COVID 19 Prevention and Control",
+            "Policies and Guidelines on Student Behavior during Online Correspondence Based Learning",
+            "SLU Policy on COVID-19 Prevention and Control Measures in the Workplace",
+            "SLU Privacy Policy",
+            "SLU Quality Policy",
+            "SLU UNIVERSITY PRAYER",
+            "Special Guidelines for Recognition or Renewal of Recognition 2021 to 2022",
+            "Baguio City Anti Discrimination Ordinance",
+            "IRR of RA 11313 Safe Spaces Act",
+            "Safe Spaces Act 20190417 RA 11313 R&D",
+            "Emails of SLU Student Groups"
+        };
+    }
+
+    private String[] createCounselingDownloadables() {
+        return new String[]{
+            "Handouts for Parents on their Children's Independent Living in College",
+            "Freshie Career Booklet",
+            "Referral Guide Poster",
+            "SULN Brochure",
+            "SULN Form",
+            "The Louisian Journal 2023",
+            "CCV Referral Form"
+        };
+    }
+
+    private String[] createOtherServicesDownloadables() {
+        return new String[]{
+            "MEDICAL CLINIC CONTINUITY PLAN",
+            "Online Schedule of Medical Clinic",
+            "SLU Residence Halls"
+        };
+    }
+
+    private String[] createSAMCISDownloadables() {
+        return new String[]{
+            "SAMCIS Online Helpdesk",
+            "SAMCIS Program Offerings Overview"
+        };
+    }
+
+    private String[] createSASDownloadables() {
+        return new String[]{
+            "SAS HELPDESK"
+        };
+    }
+
+    private String[] createSEADownloadables() {
+        return new String[]{
+            "SEA Online Helpdesk",
+            "SEA Program Offerings Overview"
+        };
+    }
+
+    private String[] createSONAHBSDownloadables() {
+        return new String[]{
+            "SONAHBS Online Helpdesk",
+            "SOL Online Helpdesk"
+        };
+    }
+
+    private String[] createSOMDownloadables() {
+        return new String[]{
+            "SOM Online Helpdesk"
+        };
+    }
+
+    private String[] createSTELADownloadables() {
+        return new String[]{
+            "STELA Online Helpdesk",
+            "STELA Program Offerings Overview"
+        };
+    }
+
+    private String[] createStudentServicesDownloadables() {
+        return new String[]{
+            "Guidance Center",
+            "Office of Student Affairs",
+            "University Registrar's Office",
+            "University Libraries",
+            "Office of External Relations, Media & Communications and Alumni Affairs",
+            "Office of the Vice President for Mission and Identity",
+            "Campus Planning, Maintenance, and Security Department",
+            "Dental Clinic",
+            "Medical Clinic",
+            "Technology Management and Development Department"
+        };
     }
 }
