@@ -508,17 +508,9 @@ public class ISLUStudentPortal extends JFrame {
         // Use the subItems from the MenuItem to set the column names
         String[] columnNames = subItems.toArray(new String[0]);
 
-        // Populate with your actual data
-        Object[][] data = {
-                {"7:00-8:00", "", "", "", "", ""},
-                {"8:00-9:00", "NSTP-CWTS 1", "", "NSTP-CWTS 1", "", ""},
-                {"9:00-10:00", "Programming 2", "", "Programming 2", "", "Programming 2"},
-                {"10:00-11:00", "Data Structures", "", "Data Structures", "", "Data Structures"},
-                {"11:00-12:00", "", "", "", "", ""},
-                {"1:00-2:00", "Database Systems", "", "Database Systems", "", ""},
-                {"2:00-3:00", "", "Web Development", "", "Web Development", ""},
-                {"3:00-4:00", "", "", "", "", ""}
-        };
+        // Build schedule data from sample courses
+        java.util.List<Course> courses = ScheduleService.getSampleCourses();
+        Object[][] data = ScheduleService.buildScheduleData(courses, columnNames);
 
         DefaultTableModel scheduleModel = new DefaultTableModel(data, columnNames) {
             @Override
@@ -533,9 +525,6 @@ public class ISLUStudentPortal extends JFrame {
         JScrollPane scrollPane = new JScrollPane(scheduleTable);
 
         schedulePanel.add(scrollPane, BorderLayout.CENTER);
-
-        // Return the newly created panel instead of adding it here.
-        // The caller method (e.g., showContent) will add it to the main panel.
         return schedulePanel;
     }
     // method for attendance Content
