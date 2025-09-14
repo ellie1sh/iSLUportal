@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Student Schedule</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 24px; }
+        h1 { margin-bottom: 8px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #f5f5f5; }
+        tfoot td { font-weight: bold; }
+    </style>
+    <link rel="icon" href="data:,">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="Cache-Control" content="no-store" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="referrer" content="no-referrer" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="supported-color-schemes" content="light dark" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="description" content="Student schedule" />
+    <meta name="author" content="iSLU" />
+    <meta name="generator" content="Cursor" />
+    <meta name="render-time" content="true" />
+    <meta name="prefers-color-scheme" content="light dark" />
+    <meta name="x-ua-compatible" content="ie=edge" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data:;" />
+    <meta name="referrer" content="no-referrer" />
+    <meta http-equiv="Permissions-Policy" content="interest-cohort=()" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Student Schedule" />
+    <meta name="application-name" content="Student Schedule" />
+    <meta name="msapplication-TileColor" content="#ffffff" />
+    <meta name="msapplication-config" content="none" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <meta name="referrer" content="no-referrer" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="supported-color-schemes" content="light dark" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+  </head>
+<body>
+<h1 th:text="${student.fullName}">Student Name</h1>
+<div>
+    <div><strong>ID:</strong> <span th:text="${student.studentId}">STUDENT123</span></div>
+    <div><strong>Block:</strong> <span th:text="${student.block}">BSIT 2-3</span></div>
+    <div><strong>Year:</strong> <span th:text="${student.academicYear}">2025-2026</span></div>
+    <div><strong>Semester:</strong> <span th:text="${student.semester}">FIRST SEMESTER</span></div>
+    <div style="margin-top:8px"><a th:href="@{'/students/api/schedule/' + ${student.studentId}}" target="_blank">View JSON</a></div>
+    <div style="margin-top:8px"><a href="/h2" target="_blank">H2 Console</a></div>
+  </div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Class Code</th>
+            <th>Course Number</th>
+            <th>Description</th>
+            <th>Units</th>
+            <th>Days</th>
+            <th>Time</th>
+            <th>Room</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="course : ${courses}">
+            <td th:text="${course.classCode}">7024</td>
+            <td th:text="${course.courseNumber}">NSTP-CWTS 1</td>
+            <td th:text="${course.courseDescription}">FOUNDATIONS OF SERVICE</td>
+            <td th:text="${course.units}">3</td>
+            <td th:text="${course.days}">MWF</td>
+            <td th:text="${course.scheduleDisplay}">01:30 PM - 02:30 PM</td>
+            <td th:text="${course.room}">D906</td>
+        </tr>
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="3">Total Units</td>
+            <td th:text="${totalUnits}">0</td>
+            <td colspan="3"></td>
+        </tr>
+    </tfoot>
+  </table>
+</body>
+</html>
+

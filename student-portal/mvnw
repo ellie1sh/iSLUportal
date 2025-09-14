@@ -1,0 +1,39 @@
+#!/bin/sh
+# ----------------------------------------------------------------------------
+# Maven Wrapper Bootstrap Script
+# ----------------------------------------------------------------------------
+
+if [ -z "$MAVEN_WRAPPER_DEBUG" ] && [ -z "$MVNW_VERBOSE" ]; then
+  set +x
+fi
+
+BASE_DIR=$(cd "$(dirname "$0")"; pwd -P)
+MVNW_JAR="$BASE_DIR/.mvn/wrapper/maven-wrapper.jar"
+MVNW_PROPERTIES="$BASE_DIR/.mvn/wrapper/maven-wrapper.properties"
+WRAPPER_URL=$(sed -n -e 's/^wrapperUrl=\(.*\)$/\1/p' "$MVNW_PROPERTIES")
+DIST_URL=$(sed -n -e 's/^distributionUrl=\(.*\)$/\1/p' "$MVNW_PROPERTIES")
+
+mkdir -p "$BASE_DIR/.mvn/wrapper"
+
+if [ ! -f "$MVNW_JAR" ]; then
+  echo "Downloading Maven Wrapper jar from: $WRAPPER_URL"
+  if command -v curl >/dev/null 2>&1; then
+    curl -fsSL "$WRAPPER_URL" -o "$MVNW_JAR"
+  elif command -v wget >/dev/null 2>&1; then
+    wget -q "$WRAPPER_URL" -O "$MVNW_JAR"
+  else
+    echo "Error: Please install curl or wget to download Maven Wrapper." >&2
+    exit 1
+  fi
+fi
+
+JAVA_EXE="${JAVA_HOME:+$JAVA_HOME/bin/}java"
+if ! command -v "$JAVA_EXE" >/dev/null 2>&1; then
+  JAVA_EXE=java
+fi
+
+exec "$JAVA_EXE" \
+  -Dmaven.multiModuleProjectDirectory="$BASE_DIR" \
+  -cp "$MVNW_JAR" \
+  org.apache.maven.wrapper.MavenWrapperMain "$@"
+
