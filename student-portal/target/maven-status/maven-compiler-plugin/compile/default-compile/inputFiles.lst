@@ -1,0 +1,10 @@
+/workspace/student-portal/src/main/java/com/islu/portal/entity/Course.java
+/workspace/student-portal/src/main/java/com/islu/portal/entity/Student.java
+/workspace/student-portal/src/main/java/com/islu/portal/config/DataInitializer.java
+/workspace/student-portal/src/main/java/com/islu/portal/StudentPortalApplication.java
+/workspace/student-portal/src/main/java/com/islu/portal/repository/EnrollmentRepository.java
+/workspace/student-portal/src/main/java/com/islu/portal/repository/StudentRepository.java
+/workspace/student-portal/src/main/java/com/islu/portal/entity/Enrollment.java
+/workspace/student-portal/src/main/java/com/islu/portal/controller/ScheduleController.java
+/workspace/student-portal/src/main/java/com/islu/portal/repository/CourseRepository.java
+/workspace/student-portal/src/main/java/com/islu/portal/service/StudentService.java
