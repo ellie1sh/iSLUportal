@@ -479,6 +479,9 @@ public class ISLUStudentPortal extends JFrame {
             case "🏠 Home":
                 setupLayout();
                 break;
+            case "📚 Journal/Periodical":
+                contentPanel.add(createJournalPeriodicalPanel());
+                break;
             case "📅 Schedule":
                 contentPanel.add(showScheduleContent(item.getSubItems()));
                 break;
@@ -507,6 +510,82 @@ public class ISLUStudentPortal extends JFrame {
         contentPanel.revalidate();
         contentPanel.repaint();
 
+    }
+    // Journal/Periodical Panel
+    private JPanel createJournalPeriodicalPanel() {
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(Color.WHITE);
+
+        // Header
+        JPanel header = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 15));
+        header.setBackground(Color.WHITE);
+
+        JTextField searchField = new JTextField();
+        searchField.setPreferredSize(new Dimension(520, 28));
+
+        JButton searchButton = new JButton("Search");
+        JButton advancedButton = new JButton("Advance Search");
+
+        header.add(searchField);
+        header.add(searchButton);
+        header.add(advancedButton);
+
+        mainPanel.add(header, BorderLayout.NORTH);
+
+        // Body copy mirroring the reference
+        JPanel body = new JPanel();
+        body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
+        body.setBackground(Color.WHITE);
+        body.setBorder(BorderFactory.createEmptyBorder(10, 40, 10, 40));
+
+        JLabel title1 = new JLabel("WHAT ARE JOURNAL INDEXES?");
+        title1.setFont(new Font("Arial", Font.BOLD, 12));
+        body.add(title1);
+
+        JTextArea text1 = new JTextArea("An index is a list of items pulled together for a purpose. Journal indexes (also called bibliographic indexes or bibliographic databases) are lists of journals, organized by discipline, subject, or type of publication.");
+        text1.setWrapStyleWord(true);
+        text1.setLineWrap(true);
+        text1.setEditable(false);
+        text1.setBackground(Color.WHITE);
+        text1.setBorder(null);
+        body.add(text1);
+        body.add(Box.createVerticalStrut(10));
+
+        JLabel title2 = new JLabel("THE SLU LIBRARIES' PERIODICAL ARTICLE INDEXES");
+        title2.setFont(new Font("Arial", Font.BOLD, 12));
+        body.add(title2);
+
+        JTextArea text2 = new JTextArea("One of the Home Library Services that the University Libraries offer is the Periodical Article Indexes where the subscribed print journals are being indexed and can be accessed through an online bibliographic database.\n\nThe Periodical Article Indexes database provides access to periodical articles by subject or author and it can help you find articles about a specific topic.");
+        text2.setWrapStyleWord(true);
+        text2.setLineWrap(true);
+        text2.setEditable(false);
+        text2.setBackground(Color.WHITE);
+        text2.setBorder(null);
+        body.add(text2);
+        body.add(Box.createVerticalStrut(10));
+
+        JLabel title3 = new JLabel("STEPS IN ACCESSING THE PERIODICAL ARTICLE INDEXES");
+        title3.setFont(new Font("Arial", Font.BOLD, 12));
+        body.add(title3);
+
+        JTextArea steps = new JTextArea(
+            "1. Enter your topic on the search box and click Search\n" +
+            "2. You will see the various bibliographic details (i.e. title of the journal, the specific date, volume and issue, and page numbers for the article) that contain your topic.\n" +
+            "3. Should you opt to read the full text of the article, you may request it by sending an email to uldir@slu.edu.ph"
+        );
+        steps.setWrapStyleWord(true);
+        steps.setLineWrap(true);
+        steps.setEditable(false);
+        steps.setBackground(Color.WHITE);
+        steps.setBorder(null);
+        body.add(steps);
+
+        JScrollPane scroll = new JScrollPane(body);
+        scroll.setBorder(null);
+        scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        mainPanel.add(scroll, BorderLayout.CENTER);
+
+        return mainPanel;
     }
     //method for Schedule Content
     private JPanel showScheduleContent(LinkedList<String> subItems) {
