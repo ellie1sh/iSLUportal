@@ -497,6 +497,9 @@ public class ISLUStudentPortal extends JFrame {
             case "📋 Transcript of Records":
                 contentPanel.add(createTranscriptOfRecordsPanel());
                 break;
+            case "📚 Journal/Periodical":
+                contentPanel.add(createJournalPeriodicalPanel());
+                break;
             case "ℹ️ Downloadable/ About iSLU":
                 contentPanel.add(createAboutISLUPanel());
                 break;
@@ -1039,9 +1042,12 @@ public class ISLUStudentPortal extends JFrame {
         LinkedList<String> personalDetailsSubList = new LinkedList<>();
         return personalDetailsSubList;
     }
-    // TO DO
     private LinkedList<String> createJournalSubList(){
         LinkedList<String> journalSubList = new LinkedList<>();
+        journalSubList.add("Search");
+        journalSubList.add("Browse by Subject");
+        journalSubList.add("Browse by Title");
+        journalSubList.add("Help");
         return journalSubList;
     }
     // TO DO
@@ -2173,5 +2179,509 @@ public class ISLUStudentPortal extends JFrame {
             "Medical Clinic",
             "Technology Management and Development Department"
         };
+    }
+
+    /**
+     * Creates the Journal/Periodical search panel matching the Saint Louis University Libraries design
+     */
+    private JPanel createJournalPeriodicalPanel() {
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(new Color(240, 240, 240));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Create scroll pane for the content
+        JPanel contentPanel = new JPanel();
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        contentPanel.setBackground(Color.WHITE);
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
+
+        // Header section
+        JPanel headerPanel = createJournalHeaderPanel();
+        contentPanel.add(headerPanel);
+        contentPanel.add(Box.createVerticalStrut(30));
+
+        // Search section
+        JPanel searchPanel = createJournalSearchPanel();
+        contentPanel.add(searchPanel);
+        contentPanel.add(Box.createVerticalStrut(30));
+
+        // Information section
+        JPanel infoPanel = createJournalInfoPanel();
+        contentPanel.add(infoPanel);
+
+        // Footer
+        contentPanel.add(Box.createVerticalGlue());
+        JPanel footerPanel = createJournalFooterPanel();
+        contentPanel.add(footerPanel);
+
+        JScrollPane scrollPane = new JScrollPane(contentPanel);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setBorder(null);
+
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        return mainPanel;
+    }
+
+    /**
+     * Creates the header section for Journal/Periodical panel
+     */
+    private JPanel createJournalHeaderPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBackground(Color.WHITE);
+
+        // Main title
+        JLabel titleLabel = new JLabel("SAINT LOUIS UNIVERSITY LIBRARIES");
+        titleLabel.setFont(new Font("Times New Roman", Font.BOLD, 28));
+        titleLabel.setForeground(new Color(0, 0, 139)); // Dark blue
+        titleLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // Subtitle
+        JLabel subtitleLabel = new JLabel("PERIODICAL ARTICLE INDEXES");
+        subtitleLabel.setFont(new Font("Times New Roman", Font.BOLD, 16));
+        subtitleLabel.setForeground(new Color(0, 0, 139)); // Dark blue
+        subtitleLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        subtitleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        panel.add(titleLabel);
+        panel.add(Box.createVerticalStrut(5));
+        panel.add(subtitleLabel);
+
+        return panel;
+    }
+
+    /**
+     * Creates the search section for Journal/Periodical panel
+     */
+    private JPanel createJournalSearchPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBackground(Color.WHITE);
+
+        // Search input section
+        JPanel searchInputPanel = new JPanel();
+        searchInputPanel.setLayout(new BoxLayout(searchInputPanel, BoxLayout.X_AXIS));
+        searchInputPanel.setBackground(Color.WHITE);
+        searchInputPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        // Search icon
+        JLabel searchIcon = new JLabel("🔍");
+        searchIcon.setFont(new Font("Arial", Font.PLAIN, 16));
+        searchInputPanel.add(searchIcon);
+        searchInputPanel.add(Box.createHorizontalStrut(10));
+
+        // Search text field
+        JTextField searchField = new JTextField();
+        searchField.setPreferredSize(new Dimension(400, 35));
+        searchField.setMaximumSize(new Dimension(400, 35));
+        searchField.setFont(new Font("Arial", Font.PLAIN, 14));
+        searchField.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        ));
+        searchInputPanel.add(searchField);
+
+        panel.add(searchInputPanel);
+        panel.add(Box.createVerticalStrut(15));
+
+        // Buttons section
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
+        buttonPanel.setBackground(Color.WHITE);
+
+        // Search button
+        JButton searchButton = new JButton("Search");
+        searchButton.setPreferredSize(new Dimension(80, 35));
+        searchButton.setBackground(new Color(240, 240, 240));
+        searchButton.setFont(new Font("Arial", Font.PLAIN, 12));
+        searchButton.setBorder(BorderFactory.createRaisedBevelBorder());
+        searchButton.addActionListener(e -> performJournalSearch(searchField.getText()));
+
+        // Advanced Search button
+        JButton advancedSearchButton = new JButton("Advance Search");
+        advancedSearchButton.setPreferredSize(new Dimension(120, 35));
+        advancedSearchButton.setBackground(new Color(240, 240, 240));
+        advancedSearchButton.setFont(new Font("Arial", Font.PLAIN, 12));
+        advancedSearchButton.setBorder(BorderFactory.createRaisedBevelBorder());
+        advancedSearchButton.addActionListener(e -> showAdvancedSearchDialog());
+
+        buttonPanel.add(searchButton);
+        buttonPanel.add(advancedSearchButton);
+
+        panel.add(buttonPanel);
+        return panel;
+    }
+
+    /**
+     * Creates the information section for Journal/Periodical panel
+     */
+    private JPanel createJournalInfoPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBackground(Color.WHITE);
+
+        // What are Journal Indexes section
+        JPanel whatAreIndexesPanel = createInfoSection(
+            "WHAT ARE JOURNAL INDEXES?",
+            "An index is a list of items pulled together for a purpose. Journal indexes (also called bibliographic indexes " +
+            "or bibliographic databases) are lists of journals, organized by discipline, subject, or type of publication."
+        );
+        panel.add(whatAreIndexesPanel);
+        panel.add(Box.createVerticalStrut(20));
+
+        // SLU Libraries section
+        JPanel sluLibrariesPanel = createInfoSection(
+            "THE SLU LIBRARIES PERIODICAL ARTICLE INDEXES",
+            "One of the Home Library Services that the University Libraries offer is the Periodical Article Indexes where " +
+            "the subscribed print journals are being indexed and can be accessed through an online bibliographic " +
+            "database.\n\n" +
+            "The Periodical Article Indexes database provides access to periodical articles by subject or author and it can " +
+            "help you find articles about a specific topic."
+        );
+        panel.add(sluLibrariesPanel);
+        panel.add(Box.createVerticalStrut(20));
+
+        // Steps section
+        JPanel stepsPanel = createStepsSection();
+        panel.add(stepsPanel);
+
+        return panel;
+    }
+
+    /**
+     * Creates an information section with title and content
+     */
+    private JPanel createInfoSection(String title, String content) {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBackground(Color.WHITE);
+        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        // Title
+        JLabel titleLabel = new JLabel(title);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        titleLabel.setForeground(new Color(139, 69, 19)); // Brown color
+        titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(titleLabel);
+        panel.add(Box.createVerticalStrut(8));
+
+        // Content
+        JTextArea contentArea = new JTextArea(content);
+        contentArea.setFont(new Font("Arial", Font.PLAIN, 11));
+        contentArea.setLineWrap(true);
+        contentArea.setWrapStyleWord(true);
+        contentArea.setEditable(false);
+        contentArea.setBackground(Color.WHITE);
+        contentArea.setBorder(null);
+        contentArea.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(contentArea);
+
+        return panel;
+    }
+
+    /**
+     * Creates the steps section for accessing periodical article indexes
+     */
+    private JPanel createStepsSection() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBackground(Color.WHITE);
+        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        // Title
+        JLabel titleLabel = new JLabel("STEPS IN ACCESSING THE PERIODICAL ARTICLE INDEXES");
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        titleLabel.setForeground(new Color(139, 69, 19)); // Brown color
+        titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(titleLabel);
+        panel.add(Box.createVerticalStrut(8));
+
+        // Steps
+        String[] steps = {
+            "1. Enter your topic on the search box and click Search.",
+            "2. You will see the various bibliographic details (i.e title of the journal, the specific date, volume and " +
+            "issue, and page numbers for the article) that contain your topic.",
+            "3. Should you opt to read the full text of the article, you may request it by sending an email to " +
+            "udl@slu.edu.ph."
+        };
+
+        for (String step : steps) {
+            JTextArea stepArea = new JTextArea(step);
+            stepArea.setFont(new Font("Arial", Font.PLAIN, 11));
+            stepArea.setLineWrap(true);
+            stepArea.setWrapStyleWord(true);
+            stepArea.setEditable(false);
+            stepArea.setBackground(Color.WHITE);
+            stepArea.setBorder(null);
+            stepArea.setAlignmentX(Component.LEFT_ALIGNMENT);
+            panel.add(stepArea);
+            panel.add(Box.createVerticalStrut(5));
+        }
+
+        return panel;
+    }
+
+    /**
+     * Creates the footer section for Journal/Periodical panel
+     */
+    private JPanel createJournalFooterPanel() {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        panel.setBackground(Color.WHITE);
+
+        JLabel footerLabel = new JLabel("Copyright © 2024 TMDD - Software Development. All rights reserved.");
+        footerLabel.setFont(new Font("Arial", Font.PLAIN, 10));
+        footerLabel.setForeground(Color.GRAY);
+        panel.add(footerLabel);
+
+        return panel;
+    }
+
+    /**
+     * Performs journal search functionality
+     */
+    private void performJournalSearch(String searchTerm) {
+        if (searchTerm.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, 
+                "Please enter a search term.", 
+                "Search Required", 
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Create search results dialog
+        JDialog resultsDialog = new JDialog(this, "Search Results", true);
+        resultsDialog.setSize(800, 600);
+        resultsDialog.setLocationRelativeTo(this);
+        resultsDialog.setLayout(new BorderLayout());
+
+        // Header
+        JPanel headerPanel = new JPanel();
+        headerPanel.setBackground(new Color(10, 45, 90));
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
+        
+        JLabel headerLabel = new JLabel("Search Results for: \"" + searchTerm + "\"");
+        headerLabel.setForeground(Color.WHITE);
+        headerLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        headerPanel.add(headerLabel);
+        
+        resultsDialog.add(headerPanel, BorderLayout.NORTH);
+
+        // Results content
+        JPanel contentPanel = new JPanel();
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        contentPanel.setBackground(Color.WHITE);
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Sample search results
+        String[][] sampleResults = {
+            {"Journal of Computer Science", "Vol. 15, No. 3", "March 2024", "pp. 45-62", "Advanced Database Management Systems"},
+            {"International Journal of Information Technology", "Vol. 22, No. 1", "January 2024", "pp. 12-28", "Cloud Computing in Education"},
+            {"IEEE Transactions on Software Engineering", "Vol. 50, No. 2", "February 2024", "pp. 234-251", "Software Development Methodologies"},
+            {"ACM Computing Surveys", "Vol. 56, No. 4", "April 2024", "pp. 1-35", "Machine Learning Applications"},
+            {"Information Systems Journal", "Vol. 34, No. 2", "May 2024", "pp. 156-178", "Digital Transformation Strategies"}
+        };
+
+        JLabel resultCountLabel = new JLabel("Found " + sampleResults.length + " results:");
+        resultCountLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        contentPanel.add(resultCountLabel);
+        contentPanel.add(Box.createVerticalStrut(15));
+
+        // Create table for results
+        String[] columnNames = {"Journal Title", "Volume/Issue", "Date", "Pages", "Article Title"};
+        DefaultTableModel resultsModel = new DefaultTableModel(sampleResults, columnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        JTable resultsTable = new JTable(resultsModel);
+        resultsTable.setRowHeight(30);
+        resultsTable.getTableHeader().setBackground(new Color(240, 240, 240));
+        resultsTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        resultsTable.setFont(new Font("Arial", Font.PLAIN, 11));
+
+        JScrollPane scrollPane = new JScrollPane(resultsTable);
+        scrollPane.setPreferredSize(new Dimension(750, 400));
+        contentPanel.add(scrollPane);
+
+        contentPanel.add(Box.createVerticalStrut(20));
+
+        // Note about requesting full text
+        JTextArea noteArea = new JTextArea(
+            "Note: To request the full text of any article, please send an email to udl@slu.edu.ph " +
+            "with the complete bibliographic details (journal title, volume, issue, date, and page numbers)."
+        );
+        noteArea.setFont(new Font("Arial", Font.ITALIC, 12));
+        noteArea.setForeground(new Color(139, 69, 19));
+        noteArea.setLineWrap(true);
+        noteArea.setWrapStyleWord(true);
+        noteArea.setEditable(false);
+        noteArea.setBackground(Color.WHITE);
+        noteArea.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
+        contentPanel.add(noteArea);
+
+        resultsDialog.add(contentPanel, BorderLayout.CENTER);
+
+        // Close button
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.setBackground(Color.WHITE);
+        JButton closeButton = new JButton("Close");
+        closeButton.setPreferredSize(new Dimension(80, 35));
+        closeButton.addActionListener(e -> resultsDialog.dispose());
+        buttonPanel.add(closeButton);
+        resultsDialog.add(buttonPanel, BorderLayout.SOUTH);
+
+        resultsDialog.setVisible(true);
+    }
+
+    /**
+     * Shows advanced search dialog
+     */
+    private void showAdvancedSearchDialog() {
+        JDialog advancedDialog = new JDialog(this, "Advanced Search", true);
+        advancedDialog.setSize(600, 500);
+        advancedDialog.setLocationRelativeTo(this);
+        advancedDialog.setLayout(new BorderLayout());
+
+        // Header
+        JPanel headerPanel = new JPanel();
+        headerPanel.setBackground(new Color(10, 45, 90));
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
+        
+        JLabel headerLabel = new JLabel("Advanced Search - Periodical Article Indexes");
+        headerLabel.setForeground(Color.WHITE);
+        headerLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        headerPanel.add(headerLabel);
+        
+        advancedDialog.add(headerPanel, BorderLayout.NORTH);
+
+        // Content
+        JPanel contentPanel = new JPanel();
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        contentPanel.setBackground(Color.WHITE);
+
+        // Search fields
+        JTextField titleField = createAdvancedSearchField(contentPanel, "Article Title:");
+        JTextField authorField = createAdvancedSearchField(contentPanel, "Author:");
+        JTextField journalField = createAdvancedSearchField(contentPanel, "Journal Title:");
+        JTextField subjectField = createAdvancedSearchField(contentPanel, "Subject:");
+        JTextField keywordField = createAdvancedSearchField(contentPanel, "Keywords:");
+
+        // Date range
+        contentPanel.add(Box.createVerticalStrut(10));
+        JLabel dateLabel = new JLabel("Publication Date Range:");
+        dateLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        contentPanel.add(dateLabel);
+        contentPanel.add(Box.createVerticalStrut(5));
+
+        JPanel datePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        datePanel.setBackground(Color.WHITE);
+        
+        JLabel fromLabel = new JLabel("From:");
+        JTextField fromField = new JTextField(10);
+        JLabel toLabel = new JLabel("To:");
+        JTextField toField = new JTextField(10);
+        
+        datePanel.add(fromLabel);
+        datePanel.add(fromField);
+        datePanel.add(Box.createHorizontalStrut(20));
+        datePanel.add(toLabel);
+        datePanel.add(toField);
+        contentPanel.add(datePanel);
+
+        advancedDialog.add(contentPanel, BorderLayout.CENTER);
+
+        // Buttons
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
+        buttonPanel.setBackground(Color.WHITE);
+        
+        JButton searchButton = new JButton("Search");
+        searchButton.setPreferredSize(new Dimension(80, 35));
+        searchButton.setBackground(new Color(0, 150, 0));
+        searchButton.setForeground(Color.WHITE);
+        searchButton.addActionListener(e -> {
+            performAdvancedSearch(titleField.getText(), authorField.getText(), 
+                                journalField.getText(), subjectField.getText(), 
+                                keywordField.getText(), fromField.getText(), toField.getText());
+            advancedDialog.dispose();
+        });
+        
+        JButton resetButton = new JButton("Reset");
+        resetButton.setPreferredSize(new Dimension(80, 35));
+        resetButton.addActionListener(e -> {
+            titleField.setText("");
+            authorField.setText("");
+            journalField.setText("");
+            subjectField.setText("");
+            keywordField.setText("");
+            fromField.setText("");
+            toField.setText("");
+        });
+        
+        JButton cancelButton = new JButton("Cancel");
+        cancelButton.setPreferredSize(new Dimension(80, 35));
+        cancelButton.addActionListener(e -> advancedDialog.dispose());
+        
+        buttonPanel.add(searchButton);
+        buttonPanel.add(resetButton);
+        buttonPanel.add(cancelButton);
+        advancedDialog.add(buttonPanel, BorderLayout.SOUTH);
+
+        advancedDialog.setVisible(true);
+    }
+
+    /**
+     * Helper method to create advanced search fields
+     */
+    private JTextField createAdvancedSearchField(JPanel parent, String labelText) {
+        JLabel label = new JLabel(labelText);
+        label.setFont(new Font("Arial", Font.BOLD, 12));
+        parent.add(label);
+        parent.add(Box.createVerticalStrut(5));
+        
+        JTextField field = new JTextField();
+        field.setPreferredSize(new Dimension(400, 25));
+        field.setMaximumSize(new Dimension(400, 25));
+        parent.add(field);
+        parent.add(Box.createVerticalStrut(10));
+        
+        return field;
+    }
+
+    /**
+     * Performs advanced search with multiple criteria
+     */
+    private void performAdvancedSearch(String title, String author, String journal, 
+                                     String subject, String keywords, String fromDate, String toDate) {
+        StringBuilder searchCriteria = new StringBuilder();
+        
+        if (!title.trim().isEmpty()) searchCriteria.append("Title: ").append(title).append("; ");
+        if (!author.trim().isEmpty()) searchCriteria.append("Author: ").append(author).append("; ");
+        if (!journal.trim().isEmpty()) searchCriteria.append("Journal: ").append(journal).append("; ");
+        if (!subject.trim().isEmpty()) searchCriteria.append("Subject: ").append(subject).append("; ");
+        if (!keywords.trim().isEmpty()) searchCriteria.append("Keywords: ").append(keywords).append("; ");
+        if (!fromDate.trim().isEmpty() || !toDate.trim().isEmpty()) {
+            searchCriteria.append("Date Range: ").append(fromDate).append(" to ").append(toDate);
+        }
+        
+        if (searchCriteria.length() == 0) {
+            JOptionPane.showMessageDialog(this, 
+                "Please enter at least one search criterion.", 
+                "Search Required", 
+                JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+        
+        JOptionPane.showMessageDialog(this, 
+            "Advanced search performed with criteria:\n" + searchCriteria.toString() + 
+            "\n\nThis would normally return filtered results from the periodical database.",
+            "Advanced Search Results", 
+            JOptionPane.INFORMATION_MESSAGE);
     }
 }
