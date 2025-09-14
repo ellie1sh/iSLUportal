@@ -1,0 +1,1677 @@
+import javax.swing.*;
+import javax.swing.border.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.LinkedList;
+import java.io.*;
+
+public class ISLUStudentPortal extends JFrame {
+    private JPanel mainPanel;
+    private JPanel contentPanel;
+    private JPanel sidebarPanel;
+    private JPanel footbarPanel;
+    private JLabel userNameLabel;
+    private JLabel semesterLabel;
+    private JTextArea announcementsArea;
+    private JTextArea statusArea;
+    private JPanel mainCardHolder;
+    private CardLayout mainCardLayout;
+    private MyDoublyLinkedList<MenuItem> menu;
+
+    // Student data
+    private String studentID;
+    private String studentName;
+    private String semester = "FIRST SEMESTER, 2025-2026";
+    private String status = "CURRENTLY ENROLLED THIS FIRST SEMESTER, 2025-2026 IN BSIT 2.";
+
+    public ISLUStudentPortal(String studentID) {
+        this.studentID = studentID;
+        this.studentName = getStudentNameFromDatabase(studentID);
+        
+        // Initialize random amounts for each account
+        this.amountDue = generateRandom5DigitAmount();
+        this.currentBalance = generateRandom5DigitAmount();
+        
+        initializeComponents();
+        setupLayout();
+        loadAnnouncements();
+        loadStudentStatus();
+    }
+
+    /**
+     * Generates a random 5-digit amount (10000.00 to 99999.99)
+     */
+    private double generateRandom5DigitAmount() {
+        // Generate random integer between 10000 and 99999
+        int randomInt = 10000 + (int) (Math.random() * 90000);
+        // Add random cents (0.00 to 0.99)
+        double randomCents = Math.random();
+        return randomInt + randomCents;
+    }
+
+    /**
+     * Generates random grade between 76-99
+     */
+    private int generateRandomGrade() {
+        return 76 + (int) (Math.random() * 24); // 76 to 99
+    }
+
+    /**
+     * Generates transcript data with all semesters and random grades
+     */
+    private Object[][] generateTranscriptData() {
+        java.util.List<Object[]> data = new java.util.ArrayList<>();
+        
+        // FIRST SEMESTER, 2024-2025
+        data.add(new Object[]{"FIRST SEMESTER, 2024-2025", "", "", ""});
+        data.add(new Object[]{"CFE 101", "GOD'S JOURNEY WITH HIS PEOPLE", generateRandomGrade(), 3});
+        data.add(new Object[]{"FIT HW", "PHYSICAL ACTIVITY TOWARDS HEALTH AND FITNESS (HEALTH AND WELLNESS)", generateRandomGrade(), 2});
+        data.add(new Object[]{"GART", "ART APPRECIATION", generateRandomGrade(), 3});
+        data.add(new Object[]{"GHIST", "READINGS IN PHILIPPINE HISTORY", generateRandomGrade(), 3});
+        data.add(new Object[]{"GSELF", "UNDERSTANDING THE SELF", generateRandomGrade(), 3});
+        data.add(new Object[]{"IT 111", "INTRODUCTION TO COMPUTING (LEC)", generateRandomGrade(), 2});
+        data.add(new Object[]{"IT 111L", "INTRODUCTION TO COMPUTING (LAB)", generateRandomGrade(), 1});
+        data.add(new Object[]{"IT 112", "COMPUTER PROGRAMMING 1 (LEC)", generateRandomGrade(), 2});
+        data.add(new Object[]{"IT 112L", "COMPUTER PROGRAMMING 1 (LAB)", generateRandomGrade(), 1});
+        data.add(new Object[]{"IT 113", "DISCRETE MATHEMATICS", generateRandomGrade(), 3});
+        
+        // SECOND SEMESTER, 2024-2025
+        data.add(new Object[]{"SECOND SEMESTER, 2024-2025", "", "", ""});
+        data.add(new Object[]{"CFE 102", "CHRISTIAN MORALITY IN OUR TIMES", generateRandomGrade(), 3});
+        data.add(new Object[]{"FIT CS", "PHYSICAL ACTIVITY TOWARDS HEALTH AND FITNESS (COMBATIVE SPORTS)", generateRandomGrade(), 2});
+        data.add(new Object[]{"GCWORLD", "THE CONTEMPORARY WORLD", generateRandomGrade(), 3});
+        data.add(new Object[]{"GMATH", "MATHEMATICS IN THE MODERN WORLD", generateRandomGrade(), 3});
+        data.add(new Object[]{"GPCOM", "PURPOSIVE COMMUNICATION", generateRandomGrade(), 3});
+        data.add(new Object[]{"IT 121", "INFORMATION SYSTEM FUNDAMENTALS", generateRandomGrade(), 3});
+        data.add(new Object[]{"IT 122", "COMPUTER PROGRAMMING 2", generateRandomGrade(), 2});
+        data.add(new Object[]{"IT 122L", "COMPUTER PROGRAMMING 2 (LAB)", generateRandomGrade(), 1});
+        data.add(new Object[]{"IT 123", "PLATFORM TECHNOLOGIES", generateRandomGrade(), 2});
+        data.add(new Object[]{"IT 123L", "PLATFORM TECHNOLOGIES (LAB)", generateRandomGrade(), 1});
+        
+        // SHORT TERM, 2025
+        data.add(new Object[]{"SHORT TERM, 2025", "", "", ""});
+        data.add(new Object[]{"GRIZAL", "THE LIFE AND WORKS OF RIZAL", generateRandomGrade(), 3});
+        data.add(new Object[]{"IT 131", "COMPUTER ARCHITECTURE", generateRandomGrade(), 2});
+        data.add(new Object[]{"IT 131L", "COMPUTER ARCHITECTURE (LAB)", generateRandomGrade(), 1});
+        
+        return data.toArray(new Object[data.size()][4]);
+    }
+
+    private void initializeComponents() {
+        setTitle("iSLU Student Portal");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(1200, 800);
+        setLocationRelativeTo(null);
+
+        // Create main panel
+        mainPanel = new JPanel(new BorderLayout());
+
+        // Create header
+        JPanel headerPanel = createHeader();
+
+        // Create sidebar
+        sidebarPanel = createSidebar();
+
+        footbarPanel = createFooter();
+        // Create content panel
+
+        JPanel mainContentPanel = new JPanel(new BorderLayout());
+        contentPanel = new JPanel(new GridLayout(1, 2, 10, 10));
+        contentPanel.setBorder(new EmptyBorder(20, 20, 20, 20));
+        contentPanel.setBackground(Color.WHITE);
+
+        mainContentPanel.add(contentPanel, BorderLayout.CENTER);
+        mainContentPanel.add(footbarPanel, BorderLayout.SOUTH);
+
+
+        mainPanel.add(headerPanel, BorderLayout.NORTH);
+        mainPanel.add(sidebarPanel, BorderLayout.WEST);
+        mainPanel.add(mainContentPanel, BorderLayout.CENTER);
+
+        add(mainPanel);
+    }
+
+    private JPanel createHeader() {
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(new Color(13, 37, 73));
+        headerPanel.setPreferredSize(new Dimension(0, 55));
+        headerPanel.setBorder(new EmptyBorder(10, 20, 10, 20));
+
+        JSeparator headerSeparator = new JSeparator();
+        headerSeparator.setForeground(new Color(70, 130, 180)); // Blue separator color
+        headerSeparator.setBackground(new Color(70, 130, 180));
+        headerSeparator.setPreferredSize(new Dimension(0, 2));
+
+        // Logo section
+        JPanel logoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        logoPanel.setBackground(new Color(52, 73, 94));
+        JLabel logoLabel = new JLabel("iSLU");
+        logoLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        logoLabel.setForeground(Color.WHITE);
+        logoPanel.add(logoLabel);
+
+        // User info section
+        JPanel userPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        userPanel.setLayout(new BoxLayout(userPanel, BoxLayout.Y_AXIS));
+        userPanel.setBackground(new Color(31, 47, 57));
+
+        userNameLabel = new JLabel(studentName);
+        userNameLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        userNameLabel.setForeground(Color.WHITE);
+
+        JButton logoutButton = new JButton("Logout");
+        logoutButton.setBackground(new Color(220, 53, 69));
+        logoutButton.setForeground(Color.WHITE);
+        logoutButton.setBorderPainted(false);
+        logoutButton.addActionListener(e -> {
+            // Dispose current student portal window
+            dispose();
+            // Open login page
+            new Login().setVisible(true);
+        });
+
+        userPanel.add(userNameLabel);
+        userPanel.add(Box.createHorizontalStrut(20));
+        userPanel.add(logoutButton);
+
+        headerPanel.add(logoPanel, BorderLayout.WEST);
+        headerPanel.add(userPanel, BorderLayout.EAST);
+
+        JPanel headerWithSeparator = new JPanel(new BorderLayout());
+        headerWithSeparator.add(headerSeparator, BorderLayout.SOUTH);
+        headerWithSeparator.add(headerPanel, BorderLayout.CENTER);
+
+        return headerWithSeparator;
+    }
+
+    private JPanel createFooter() {
+        JPanel footerPanel = new JPanel(new BorderLayout());
+        footerPanel.setBackground(Color.WHITE);// Match sidebar color
+        footerPanel.setPreferredSize(new Dimension(0, 50));
+        footerPanel.setBorder(new EmptyBorder(10, 20, 10, 20));
+
+        // Add separator line at the top of footer
+        JSeparator footerSeparator = new JSeparator();
+        footerSeparator.setForeground(new Color(70, 130, 180)); // Blue separator color
+        footerSeparator.setBackground(new Color(70, 130, 180));
+        footerSeparator.setPreferredSize(new Dimension(0, 2));
+
+        // Footer content
+        JLabel copyrightLabel = new JLabel("Copyright © 2025 Saint Louis University Inc. All rights reserved.");
+        copyrightLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        copyrightLabel.setForeground(Color.BLACK);
+        copyrightLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+        JPanel footerWithSeparator = new JPanel(new BorderLayout());
+        footerWithSeparator.add(footerSeparator, BorderLayout.NORTH);
+        footerWithSeparator.add(footerPanel, BorderLayout.CENTER);
+
+        footerPanel.add(copyrightLabel, BorderLayout.CENTER);
+
+        return footerWithSeparator;
+    }
+
+    private JPanel createSidebar() {
+        JPanel sidebar = new JPanel();
+        sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
+        sidebar.setBackground(new Color(13, 37, 73));
+        sidebar.setPreferredSize(new Dimension(250, 0));
+        sidebar.setBorder(new EmptyBorder(20, 0, 20, 0));
+
+        // Semester info
+        semesterLabel = new JLabel(semester);
+        semesterLabel.setForeground(Color.WHITE);
+        semesterLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        semesterLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        semesterLabel.setBorder(new EmptyBorder(0, 0, 20, 0));
+        sidebar.add(semesterLabel);
+
+        // Navigation menu items
+        JFrame frame = new JFrame("Student Portal");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(800, 600);
+        frame.setLocationRelativeTo(null);
+
+
+        menu = createMenuItems();
+        JPanel mainSideButtonPanel = new JPanel();
+        mainSideButtonPanel.setBackground(new Color(13, 37, 73));
+        mainSideButtonPanel.setLayout(new GridLayout(0, 1, 0, 0));
+        mainSideButtonPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+
+        mainCardLayout = new CardLayout();
+        mainCardHolder = new JPanel(mainCardLayout);
+
+        for (MenuItem option : menu) {
+            JPanel buttonPanel = getButtonPanel(option);
+            mainSideButtonPanel.add(buttonPanel);
+
+
+            buttonPanel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    mainCardLayout.show(mainCardHolder, option.getName());
+                    showContent(option);
+                }
+            });
+        }
+        sidebar.add(mainSideButtonPanel, BorderLayout.WEST);
+
+        return sidebar;
+    }
+
+    private static JPanel getButtonPanel(MenuItem text) {
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new BorderLayout()); // Use BorderLayout to align the label
+
+        // Set the panel's background color
+        buttonPanel.setBackground(new Color(13, 37, 73));
+        buttonPanel.setOpaque(true);
+
+        // Create the top/bottom border
+        Border topBottomBorder = BorderFactory.createMatteBorder(1, 0, 1, 0, Color.black);
+
+        // Create the padding border (this goes inside the top/bottom border)
+        Border padding = new EmptyBorder(10, 10, 10, 10);
+
+        // Combine the borders
+        Border finalBorder = BorderFactory.createCompoundBorder(topBottomBorder, padding);
+        buttonPanel.setBorder(finalBorder);
+
+        // Create a JLabel for the text
+        JLabel buttonLabel = new JLabel(text.getName());
+        buttonLabel.setForeground(Color.WHITE);
+        buttonLabel.setHorizontalAlignment(SwingConstants.LEFT);
+        buttonLabel.setOpaque(false); // Make the label transparent
+
+        // Add the label to the panel. Use BorderLayout.WEST to align it to the left.
+        buttonPanel.add(buttonLabel, BorderLayout.WEST);
+
+        return buttonPanel;
+    }
+
+    private void setupLayout() {
+        // Create announcements panel
+        JPanel announcementsPanel = createAnnouncementsPanel();
+        loadAnnouncements();
+        // Create student status panel
+        JPanel statusPanel = createStatusPanel();
+        loadStudentStatus();
+
+        contentPanel.add(announcementsPanel);
+        contentPanel.add(statusPanel);
+    }
+
+    // Method for the "Grade" sub-panels
+    private JPanel createGradesPanel(LinkedList<String> subItems) {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Color.WHITE);
+
+        JLabel titleLabel = new JLabel("Grades", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+
+        // Convert the LinkedList to a String array for JTable column headers
+        String[] columnNames = subItems.toArray(new String[0]);
+
+        // Create an empty data array
+        Object[][] data = new Object[0][columnNames.length];
+
+        DefaultTableModel tableModel = new DefaultTableModel(data, columnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Make all cells non-editable
+            }
+        };
+        JTable table = new JTable(tableModel);
+        table.setPreferredSize(new Dimension(500, 300));
+        table.setFillsViewportHeight(true);
+        table.getTableHeader().setReorderingAllowed(false); // Disable column reordering
+        table.setAutoCreateRowSorter(false); // Disable sorting
+
+        // Populate the table with dummy data and calculate the final grade
+        // Note: The grades are now stored as numbers for calculation
+        Object[] grades1 = {"Intro to Programming", 90, 92, 91};
+        Object[] grades2 = {"Data Structures", 85, 88, 87};
+        Object[] grades3 = {"Algorithms", 95, 96, 95};
+
+        // Calculate the average for each set of grades
+        double average1 = (double) ((int) grades1[1] + (int) grades1[2] + (int) grades1[3]) / 3.0;
+        double average2 = (double) ((int) grades2[1] + (int) grades2[2] + (int) grades2[3]) / 3.0;
+        double average3 = (double) ((int) grades3[1] + (int) grades3[2] + (int) grades3[3]) / 3.0;
+
+        // Add the calculated average to the end of each grades array
+        // You can format the average to two decimal places
+        grades1 = new Object[] {grades1[0], grades1[1], grades1[2], grades1[3], String.format("%.2f", average1)};
+        grades2 = new Object[] {grades2[0], grades1[1], grades2[2], grades2[3], String.format("%.2f", average2)};
+        grades3 = new Object[] {grades3[0], grades3[1], grades3[2], grades3[3], String.format("%.2f", average3)};
+
+        tableModel.addRow(grades1);
+        tableModel.addRow(grades2);
+        tableModel.addRow(grades3);
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(5, 20, 0, 20));
+
+        panel.add(titleLabel, BorderLayout.NORTH);
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        return panel;
+    }
+
+    // Method for the Announcements sub-panels
+
+    private JPanel createAnnouncementsPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(Color.GRAY),
+                "📰 Events, News & Announcements",
+                TitledBorder.LEFT,
+                TitledBorder.TOP,
+                new Font("Arial", Font.BOLD, 14)
+        ));
+        panel.setBackground(Color.WHITE);
+
+        announcementsArea = new JTextArea();
+        announcementsArea.setEditable(false);
+        announcementsArea.setFont(new Font("Arial", Font.PLAIN, 12));
+        announcementsArea.setLineWrap(true);
+        announcementsArea.setWrapStyleWord(true);
+        announcementsArea.setBackground(Color.WHITE);
+
+        JScrollPane scrollPane = new JScrollPane(announcementsArea);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setPreferredSize(new Dimension(0, 400));
+
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        return panel;
+    }
+    // Method for the Status sub-panels
+    private JPanel createStatusPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(Color.GRAY),
+                "📌 Student Status",
+                TitledBorder.LEFT,
+                TitledBorder.TOP,
+                new Font("Arial", Font.BOLD, 14)
+        ));
+        panel.setBackground(Color.WHITE);
+
+        statusArea = new JTextArea();
+        statusArea.setEditable(false);
+        statusArea.setFont(new Font("Arial", Font.PLAIN, 12));
+        statusArea.setLineWrap(true);
+        statusArea.setWrapStyleWord(true);
+        statusArea.setBackground(Color.WHITE);
+
+        JScrollPane scrollPane = new JScrollPane(statusArea);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setPreferredSize(new Dimension(0, 400));
+
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        return panel;
+    }
+    // Content for announcements
+    private void loadAnnouncements() {
+
+        StringBuilder announcements = new StringBuilder();
+
+        announcements.append("[INVITATION FOR FRESHMEN] 29th PSQ - University Elimination Round\n\n");
+        announcements.append("Good day, freshmen Louisians!\n\n");
+        announcements.append("We are inviting all of you to join and participate in the 29th Philippine Statistics Quiz - SLU Qualifiers, Elimination Round! The competition will be conducted online on September 12, 2025. The top 30 qualifiers from the elimination round will battle it out in the final round in October 2025. The top 2 placers will represent Saint Louis University in the Regional Finals tentatively scheduled in November!\n\n");
+        announcements.append("For those currently enrolled in a mathematics course, you may consult with your respective instructors for more details.\n\n");
+        announcements.append("For any inquiries, do not hesitate to contact Mr. Clarenz Magsakay via cbmagsakay@slu.edu.ph.\n\n");
+        announcements.append("Have a wonderful day!\n");
+        announcements.append("─────────────────────────────────────────────────────\n\n");
+
+        announcements.append("[CALL FOR RESPONDENTS] A Research Survey on Assessing the Coffee Production potential of SLU Maryheights Coffee Plantation\n\n");
+        announcements.append("We are conducting a research survey to evaluate the coffee production potential of the SLU Maryheights Coffee Plantation located in Bakakeng Norte. This survey focuses on assessing the operational readiness of the plantation and exploring marketing opportunities for its coffee products.\n\n");
+        announcements.append("The primary objective of this study is to identify opportunities for developing single-origin coffee from the area, which will promote a sustainable coffee industry in Baguio City.\n\n");
+        announcements.append("Sincerely yours,\nMA. ARACELI D. TAMBOL\nSLUHTM Faculty Researcher\n");
+        announcements.append("─────────────────────────────────────────────────────\n\n");
+
+        announcements.append("AppliedHE Public & Private University Ranking Survey\n\n");
+        announcements.append("Kindly answer the survey. This will take approximately 5 minutes of your time. Thank You!\n");
+        announcements.append("─────────────────────────────────────────────────────\n\n");
+
+        announcements.append("ACADEMIC CALENDAR 2025-2026\n");
+        announcements.append("View the complete academic calendar for detailed information about important dates and deadlines.");
+
+        announcementsArea.setText(announcements.toString());
+        announcementsArea.setCaretPosition(0);
+    }
+    // Content for student status
+    private void loadStudentStatus() {
+
+        String status = "Status:\n" +
+                "- " + this.status + "\n\n\n" +
+                "Announcement from instructor:\n\n" +
+                "Class: 7024-NSTP-CWTS 1\n\n" +
+                "Google classroom invite link:\n" +
+                "https://classroom.google.com/c/NzkxOTgxNDQ3NTcy?cjc=3hnunus2\n\n" +
+                "Instructor: Bullong, Doris K.\n\n" +
+                "─────────────────────────────────────────────────────\n\n" +
+                "Additional Information:\n" +
+                "• Make sure to check your class schedule regularly\n" +
+                "• Join the Google Classroom for important updates\n" +
+                "• Contact your instructor for any class-related queries\n" +
+                "• Keep track of assignment deadlines and exam schedules";
+
+        statusArea.setText(status);
+        statusArea.setCaretPosition(0);
+    }
+
+    // method for showing different contents
+    private void showContent(MenuItem item) {
+// Clear current content
+        contentPanel.removeAll();
+        switch (item.getName()) {
+            case "🏠 Home":
+                setupLayout();
+                break;
+            case "📅 Schedule":
+                contentPanel.add(showScheduleContent(item.getSubItems()));
+                break;
+            case "📌 Attendance":
+                contentPanel.add(showAttendanceContent(item.getSubItems()));
+                break;
+            case "📊 Grades":
+                contentPanel.add(createGradesPanel(item.getSubItems()));
+                break;
+            case "👤 Personal Details":
+                showPersonalDetailsContent();
+                break;
+            case "🧮 Statement of Accounts":
+                contentPanel.add(createStatementOfAccountsPanel());
+                break;
+            case "📋 Transcript of Records":
+                contentPanel.add(createTranscriptOfRecordsPanel());
+                break;
+            default:
+                // Fallback for any other menu item with a sublist
+                showGenericContent(item.getName());
+        }
+        contentPanel.revalidate();
+        contentPanel.repaint();
+
+    }
+    //method for Schedule Content
+    private JPanel showScheduleContent(LinkedList<String> subItems) {
+        JPanel schedulePanel = new JPanel(new BorderLayout());
+        schedulePanel.setBorder(BorderFactory.createTitledBorder("Class Schedule"));
+
+        // Use the subItems from the MenuItem to set the column names
+        String[] columnNames = subItems.toArray(new String[0]);
+
+        // Populate with your actual data
+        Object[][] data = {
+                {"7:00-8:00", "", "", "", "", ""},
+                {"8:00-9:00", "NSTP-CWTS 1", "", "NSTP-CWTS 1", "", ""},
+                {"9:00-10:00", "Programming 2", "", "Programming 2", "", "Programming 2"},
+                {"10:00-11:00", "Data Structures", "", "Data Structures", "", "Data Structures"},
+                {"11:00-12:00", "", "", "", "", ""},
+                {"1:00-2:00", "Database Systems", "", "Database Systems", "", ""},
+                {"2:00-3:00", "", "Web Development", "", "Web Development", ""},
+                {"3:00-4:00", "", "", "", "", ""}
+        };
+
+        DefaultTableModel scheduleModel = new DefaultTableModel(data, columnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Make all cells non-editable
+            }
+        };
+        JTable scheduleTable = new JTable(scheduleModel);
+        scheduleTable.setRowHeight(30);
+        scheduleTable.getTableHeader().setReorderingAllowed(false); // Disable column reordering
+        scheduleTable.setAutoCreateRowSorter(false); // Disable sorting
+        JScrollPane scrollPane = new JScrollPane(scheduleTable);
+
+        schedulePanel.add(scrollPane, BorderLayout.CENTER);
+
+        // Return the newly created panel instead of adding it here.
+        // The caller method (e.g., showContent) will add it to the main panel.
+        return schedulePanel;
+    }
+    // method for attendance Content
+    private Component showAttendanceContent(LinkedList<String> subItems) {
+        JPanel attendancePanel = new JPanel(new BorderLayout());
+        attendancePanel.setBorder(BorderFactory.createTitledBorder("Attendance Record"));
+
+        String[] columnNames = subItems.toArray(new String[0]);
+        Object[][] data = {
+                {"NSTP-CWTS 1", "15", "1", "0", "93.75%"},
+                {"Programming 2", "14", "2", "1", "87.5%"},
+                {"Data Structures", "16", "0", "1", "100%"},
+                {"Database Systems", "15", "1", "0", "93.75%"},
+                {"Web Development", "13", "2", "2", "81.25%"}
+        };
+
+        DefaultTableModel attendanceModel = new DefaultTableModel(data, columnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Make all cells non-editable
+            }
+        };
+        JTable attendanceTable = new JTable(attendanceModel);
+        attendanceTable.setRowHeight(25);
+        attendanceTable.getTableHeader().setReorderingAllowed(false); // Disable column reordering
+        attendanceTable.setAutoCreateRowSorter(false); // Disable sorting
+        JScrollPane scrollPane = new JScrollPane(attendanceTable);
+
+        attendancePanel.add(scrollPane, BorderLayout.CENTER);
+        return attendancePanel;
+    }
+    // method for Personal Details Content
+    private void showPersonalDetailsContent() {
+        // Create main panel with header
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(Color.WHITE);
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Header panel
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(new Color(10, 45, 90));
+        headerPanel.setPreferredSize(new Dimension(0, 50));
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        
+        JLabel headerLabel = new JLabel("User Profile");
+        headerLabel.setForeground(Color.WHITE);
+        headerLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        headerPanel.add(headerLabel, BorderLayout.WEST);
+        
+        mainPanel.add(headerPanel, BorderLayout.NORTH);
+
+        // Content panel with three sections
+        JPanel contentPanel = new JPanel();
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        contentPanel.setBackground(Color.WHITE);
+
+        // Get student info from database
+        StudentInfo studentInfo = DataManager.getStudentInfo(studentID);
+        String birthday = studentInfo != null ? studentInfo.getDateOfBirth() : "N/A";
+        String email = studentID + "@slu.edu.ph";
+
+        // GENERAL INFORMATION Section
+        JPanel generalPanel = createSectionPanel("GENERAL INFORMATION", new Object[][]{
+            {"Gender:", "None", true, "combo", new String[]{"Male", "Female"}},
+            {"Birthday:", birthday, false, "text", null},
+            {"Citizenship:", "Filipino", true, "text", null},
+            {"Religion:", "Roman Catholic", true, "text", null},
+            {"Civil Status:", "Single", false, "text", null},
+            {"Birthplace:", "None", true, "text", null},
+            {"Nationality:", "Filipino", true, "text", null}
+        });
+
+        // CONTACT INFORMATION Section
+        JPanel contactPanel = createSectionPanel("CONTACT INFORMATION", new Object[][]{
+            {"Home Address:", "None", true, "text", null},
+            {"Home Telephone No:", "None", true, "text", null},
+            {"Baguio Address:", "None", true, "text", null},
+            {"Baguio Telephone No:", "None", true, "text", null},
+            {"Cellphone No:", "None", true, "text", null},
+            {"Email Address:", email, false, "text", null}
+        });
+
+        // CONTACT PERSONS Section
+        JPanel contactPersonsPanel = createSectionPanel("CONTACT PERSONS", new Object[][]{
+            {"Father's Name:", "None", true, "text", null},
+            {"Father's Occupation:", "None", true, "text", null},
+            {"Mother's Maiden Name:", "None", true, "text", null},
+            {"Mother's Occupation:", "None", true, "text", null},
+            {"Guardian Name:", "None", true, "text", null},
+            {"Guardian Address:", "None", true, "text", null}
+        });
+
+        contentPanel.add(generalPanel);
+        contentPanel.add(Box.createVerticalStrut(20));
+        contentPanel.add(contactPanel);
+        contentPanel.add(Box.createVerticalStrut(20));
+        contentPanel.add(contactPersonsPanel);
+
+        // Add note at the bottom
+        JPanel notePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        notePanel.setBackground(Color.WHITE);
+        JLabel noteLabel = new JLabel("NOTE: For corrections please email records@slu.edu.ph");
+        noteLabel.setForeground(Color.RED);
+        noteLabel.setFont(new Font("Arial", Font.ITALIC, 12));
+        notePanel.add(noteLabel);
+        contentPanel.add(Box.createVerticalStrut(20));
+        contentPanel.add(notePanel);
+
+        mainPanel.add(contentPanel, BorderLayout.CENTER);
+
+        // Add scroll pane
+        JScrollPane scrollPane = new JScrollPane(mainPanel);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollPane.setBorder(null);
+
+        this.contentPanel.add(scrollPane);
+    }
+
+    private JPanel createSectionPanel(String title, Object[][] data) {
+        JPanel sectionPanel = new JPanel(new BorderLayout());
+        sectionPanel.setBackground(Color.WHITE);
+        sectionPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(15, 15, 15, 15)
+        ));
+
+        // Section title
+        JLabel titleLabel = new JLabel(title);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        titleLabel.setForeground(new Color(10, 45, 90));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+        sectionPanel.add(titleLabel, BorderLayout.NORTH);
+
+        // Data panel
+        JPanel dataPanel = new JPanel(new GridBagLayout());
+        dataPanel.setBackground(Color.WHITE);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.insets = new Insets(5, 5, 5, 5);
+
+        for (int i = 0; i < data.length; i++) {
+            String label = (String) data[i][0];
+            String value = (String) data[i][1];
+            boolean editable = (Boolean) data[i][2];
+            String fieldType = (String) data[i][3];
+            String[] options = (String[]) data[i][4];
+
+            // Label
+            gbc.gridx = 0;
+            gbc.gridy = i;
+            gbc.weightx = 0.3;
+            JLabel labelComponent = new JLabel(label);
+            labelComponent.setFont(new Font("Arial", Font.PLAIN, 12));
+            labelComponent.setPreferredSize(new Dimension(200, 25));
+            dataPanel.add(labelComponent, gbc);
+
+            // Value component
+            gbc.gridx = 1;
+            gbc.weightx = 0.7;
+            gbc.fill = GridBagConstraints.HORIZONTAL;
+            
+            JPanel valuePanel = new JPanel(new BorderLayout());
+            valuePanel.setBackground(Color.WHITE);
+            
+            Component valueComponent;
+            if (fieldType.equals("combo") && editable) {
+                JComboBox<String> comboBox = new JComboBox<>(options);
+                comboBox.setSelectedItem(value.equals("None") ? null : value);
+                comboBox.setFont(new Font("Arial", Font.PLAIN, 12));
+                comboBox.setPreferredSize(new Dimension(250, 25));
+                valueComponent = comboBox;
+            } else {
+                JTextField textField = new JTextField(value);
+                textField.setFont(new Font("Arial", Font.PLAIN, 12));
+                textField.setPreferredSize(new Dimension(250, 25));
+                textField.setEditable(editable);
+                if (!editable) {
+                    textField.setBackground(new Color(240, 240, 240));
+                }
+                valueComponent = textField;
+            }
+            
+            valuePanel.add(valueComponent, BorderLayout.WEST);
+            
+            // Edit button (pen icon)
+            if (editable) {
+                JButton editButton = new JButton("✏️");
+                editButton.setFont(new Font("Arial", Font.PLAIN, 12));
+                editButton.setPreferredSize(new Dimension(30, 25));
+                editButton.setToolTipText("Edit " + label);
+                editButton.addActionListener(e -> showEditDialog(label, valueComponent, fieldType, options));
+                valuePanel.add(editButton, BorderLayout.EAST);
+            }
+            
+            dataPanel.add(valuePanel, gbc);
+        }
+
+        sectionPanel.add(dataPanel, BorderLayout.CENTER);
+        return sectionPanel;
+    }
+
+    private void showEditDialog(String fieldName, Component component, String fieldType, String[] options) {
+        JDialog editDialog = new JDialog(this, "Edit " + fieldName, true);
+        editDialog.setSize(400, 200);
+        editDialog.setLocationRelativeTo(this);
+        editDialog.setLayout(new BorderLayout());
+
+        // Header
+        JPanel headerPanel = new JPanel();
+        headerPanel.setBackground(new Color(10, 45, 90));
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
+        
+        JLabel headerLabel = new JLabel("Edit " + fieldName);
+        headerLabel.setForeground(Color.WHITE);
+        headerLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        headerPanel.add(headerLabel);
+        
+        editDialog.add(headerPanel, BorderLayout.NORTH);
+
+        // Content
+        JPanel contentPanel = new JPanel();
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        contentPanel.setBackground(Color.WHITE);
+
+        JLabel instructionLabel = new JLabel("Enter new value for " + fieldName + ":");
+        instructionLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        contentPanel.add(instructionLabel);
+        contentPanel.add(Box.createVerticalStrut(15));
+
+        Component inputComponent;
+        if (fieldType.equals("combo")) {
+            JComboBox<String> comboBox = new JComboBox<>(options);
+            comboBox.setFont(new Font("Arial", Font.PLAIN, 12));
+            comboBox.setPreferredSize(new Dimension(300, 30));
+            inputComponent = comboBox;
+        } else {
+            JTextField textField = new JTextField();
+            textField.setFont(new Font("Arial", Font.PLAIN, 12));
+            textField.setPreferredSize(new Dimension(300, 30));
+            inputComponent = textField;
+        }
+        
+        contentPanel.add(inputComponent);
+        contentPanel.add(Box.createVerticalStrut(20));
+
+        // Buttons
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
+        buttonPanel.setBackground(Color.WHITE);
+        
+        JButton saveButton = new JButton("Save");
+        saveButton.setBackground(new Color(0, 150, 0));
+        saveButton.setForeground(Color.WHITE);
+        saveButton.setFont(new Font("Arial", Font.BOLD, 12));
+        saveButton.setPreferredSize(new Dimension(80, 35));
+        saveButton.addActionListener(e -> {
+            String newValue;
+            if (fieldType.equals("combo")) {
+                newValue = ((JComboBox<String>) inputComponent).getSelectedItem() != null ? 
+                          ((JComboBox<String>) inputComponent).getSelectedItem().toString() : "None";
+            } else {
+                newValue = ((JTextField) inputComponent).getText().trim();
+            }
+            
+            if (!newValue.isEmpty()) {
+                updateFieldValue(component, newValue);
+                JOptionPane.showMessageDialog(editDialog, 
+                    fieldName + " updated successfully!", 
+                    "Update Successful", 
+                    JOptionPane.INFORMATION_MESSAGE);
+                editDialog.dispose();
+            } else {
+                JOptionPane.showMessageDialog(editDialog, 
+                    "Please enter a valid value.", 
+                    "Invalid Input", 
+                    JOptionPane.ERROR_MESSAGE);
+            }
+        });
+        
+        JButton cancelButton = new JButton("Cancel");
+        cancelButton.setBackground(new Color(200, 0, 0));
+        cancelButton.setForeground(Color.WHITE);
+        cancelButton.setFont(new Font("Arial", Font.BOLD, 12));
+        cancelButton.setPreferredSize(new Dimension(80, 35));
+        cancelButton.addActionListener(e -> editDialog.dispose());
+        
+        buttonPanel.add(saveButton);
+        buttonPanel.add(cancelButton);
+        contentPanel.add(buttonPanel);
+
+        editDialog.add(contentPanel, BorderLayout.CENTER);
+        editDialog.setVisible(true);
+    }
+
+    private void updateFieldValue(Component component, String newValue) {
+        if (component instanceof JTextField) {
+            ((JTextField) component).setText(newValue);
+        } else if (component instanceof JComboBox) {
+            ((JComboBox<String>) component).setSelectedItem(newValue);
+        }
+    }
+// Generic Content
+
+    private void showGenericContent(String menuItem) {
+        JPanel genericPanel = new JPanel(new BorderLayout());
+        genericPanel.setBorder(BorderFactory.createTitledBorder(menuItem));
+
+        JTextArea contentArea = new JTextArea();
+        contentArea.setEditable(false);
+        contentArea.setFont(new Font("Arial", Font.PLAIN, 14));
+        contentArea.setText("This is the " + menuItem + " section.\n\n" +
+                "Content for this section is currently under development.\n" +
+                "Please check back later for updates.");
+        contentArea.setBackground(Color.WHITE);
+
+        JScrollPane scrollPane = new JScrollPane(contentArea);
+        genericPanel.add(scrollPane, BorderLayout.CENTER);
+
+        contentPanel.add(genericPanel);
+    }
+
+    // These methods are now handled by PortalUtils.createIntegratedMenuSystem()
+    // Keeping only the methods specific to this portal
+    // TO DO
+    private LinkedList<String> createSOASubList(){
+        LinkedList<String> sOASubList = new LinkedList<>();
+        return sOASubList;
+    }
+    // TO DO
+    private LinkedList<String> createTORSubList(){
+        LinkedList<String> TORSubList = new LinkedList<>();
+        return TORSubList;
+    }
+    // TO DO
+    private LinkedList<String> createCurriculumChecklistSubList(){
+        LinkedList<String> CurriculumChecklistSubList = new LinkedList<>();
+        return CurriculumChecklistSubList;
+    }
+    // TO DO
+    private LinkedList<String> createMedicalSubList(){
+        LinkedList<String> medicalSubList = new LinkedList<>();
+        return medicalSubList;
+    }
+    // TO DO
+    private LinkedList<String> createPersonalDetailsSubList(){
+        LinkedList<String> personalDetailsSubList = new LinkedList<>();
+        return personalDetailsSubList;
+    }
+    // TO DO
+    private LinkedList<String> createJournalSubList(){
+        LinkedList<String> journalSubList = new LinkedList<>();
+        return journalSubList;
+    }
+    // TO DO
+    private LinkedList<String> createDownloadableSubList(){
+        LinkedList<String> downloadableSubList = new LinkedList<>();
+        return downloadableSubList;
+    }
+
+    // MAIN DOUBLY LINKED LIST - Now using integrated PortalUtils
+    private MyDoublyLinkedList<MenuItem> createMenuItems() {
+        // Use the integrated menu system from PortalUtils
+        MyDoublyLinkedList<MenuItem> menu = PortalUtils.createIntegratedMenuSystem();
+        
+        // Add additional menu items specific to this portal
+        LinkedList<String> curriculumChecklistSubList = createCurriculumChecklistSubList();
+        menu.add(new MenuItem("✅ Curriculum Checklist", curriculumChecklistSubList));
+
+        LinkedList<String> medicalSubList = createMedicalSubList();
+        menu.add(new MenuItem("🏥 Medical Record", medicalSubList));
+
+        LinkedList<String> journalSubList = createJournalSubList();
+        menu.add(new MenuItem("📚 Journal/Periodical", journalSubList));
+
+        LinkedList<String> downloadableSubList = createDownloadableSubList();
+        menu.add(new MenuItem("ℹ️ Downloadable/ About iSLU", downloadableSubList));
+
+        return menu;
+    }
+
+    /**
+     * Retrieves student name using DataManager
+     * @param studentID The student ID to look up
+     * @return Formatted student name (FirstName LastName) or default if not found
+     */
+    private String getStudentNameFromDatabase(String studentID) {
+        StudentInfo studentInfo = DataManager.getStudentInfo(studentID);
+        if (studentInfo != null) {
+            return studentInfo.getFullName();
+        }
+        return "STUDENT NAME NOT FOUND";
+    }
+
+    /**
+     * Creates the Statement of Accounts panel matching the UI design
+     */
+    private JPanel createStatementOfAccountsPanel() {
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(new Color(240, 240, 240));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Left panel - Statement of Accounts
+        JPanel leftPanel = createStatementLeftPanel();
+        leftPanel.setPreferredSize(new Dimension(600, 0));
+
+        // Right panel - Online Payment Channels
+        JPanel rightPanel = createPaymentChannelsPanel();
+        rightPanel.setPreferredSize(new Dimension(300, 0));
+
+        mainPanel.add(leftPanel, BorderLayout.CENTER);
+        mainPanel.add(rightPanel, BorderLayout.EAST);
+
+        return mainPanel;
+    }
+
+    private JPanel createStatementLeftPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(0, 0, 0, 0)
+        ));
+
+        // Header
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(new Color(10, 45, 90));
+        headerPanel.setPreferredSize(new Dimension(0, 50));
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        
+        JLabel headerLabel = new JLabel("Statement of Accounts (SHORT TERM, 2025)");
+        headerLabel.setForeground(Color.WHITE);
+        headerLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        headerPanel.add(headerLabel, BorderLayout.WEST);
+        
+        // Profile icon on the right
+        JLabel profileIcon = new JLabel("👤");
+        profileIcon.setForeground(Color.WHITE);
+        profileIcon.setFont(new Font("Arial", Font.PLAIN, 24));
+        profileIcon.setHorizontalAlignment(SwingConstants.CENTER);
+        headerPanel.add(profileIcon, BorderLayout.EAST);
+        
+        panel.add(headerPanel, BorderLayout.NORTH);
+
+        // Content panel
+        JPanel contentPanel = new JPanel();
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        contentPanel.setBackground(Color.WHITE);
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Student Info
+        JPanel studentInfoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        studentInfoPanel.setBackground(Color.WHITE);
+        studentInfoPanel.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
+        studentInfoPanel.setPreferredSize(new Dimension(0, 80));
+        
+        JLabel studentIcon = new JLabel("👤");
+        studentIcon.setFont(new Font("Arial", Font.PLAIN, 20));
+        studentInfoPanel.add(studentIcon);
+        
+        JPanel studentTextPanel = new JPanel();
+        studentTextPanel.setLayout(new BoxLayout(studentTextPanel, BoxLayout.Y_AXIS));
+        studentTextPanel.setBackground(Color.WHITE);
+        
+        JLabel studentIDLabel = new JLabel(studentID);
+        studentIDLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        studentTextPanel.add(studentIDLabel);
+        
+        JLabel studentNameLabel = new JLabel(studentName);
+        studentNameLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        studentTextPanel.add(studentNameLabel);
+        
+        studentInfoPanel.add(studentTextPanel);
+        contentPanel.add(studentInfoPanel);
+        contentPanel.add(Box.createVerticalStrut(20));
+
+        // Amount Due Section
+        JPanel amountPanel = new JPanel();
+        amountPanel.setLayout(new BoxLayout(amountPanel, BoxLayout.Y_AXIS));
+        amountPanel.setBackground(Color.WHITE);
+        
+        JLabel amountDueLabel = new JLabel("Your amount due for FINALS is:");
+        amountDueLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        amountPanel.add(amountDueLabel);
+        
+        JLabel amountDueValue = new JLabel("P " + String.format("%.2f", amountDue));
+        amountDueValue.setFont(new Font("Arial", Font.BOLD, 24));
+        amountDueValue.setForeground(Color.BLACK);
+        amountDueValueLabel = amountDueValue; // Store reference for updates
+        amountPanel.add(amountDueValue);
+        
+        contentPanel.add(amountPanel);
+        contentPanel.add(Box.createVerticalStrut(10));
+
+        // Overpayment Section
+        JPanel overpaymentPanel = new JPanel();
+        overpaymentPanel.setLayout(new BoxLayout(overpaymentPanel, BoxLayout.Y_AXIS));
+        overpaymentPanel.setBackground(Color.WHITE);
+        
+        JLabel overpaymentLabel = new JLabel("Over payment as of September 08, 2025 is:");
+        overpaymentLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+        overpaymentPanel.add(overpaymentLabel);
+        
+        JLabel overpaymentValue = new JLabel("P (" + String.format("%.2f", currentBalance) + ")");
+        overpaymentValue.setFont(new Font("Arial", Font.BOLD, 24));
+        overpaymentValue.setForeground(Color.RED);
+        overpaymentValueLabel = overpaymentValue; // Store reference for updates
+        overpaymentPanel.add(overpaymentValue);
+        
+        contentPanel.add(overpaymentPanel);
+        contentPanel.add(Box.createVerticalStrut(15));
+
+        // Finals Status
+        String statusText = amountDue <= 0 ? 
+            "FINALS STATUS: PAID. Permitted to take the exams." : 
+            "FINALS STATUS: UNPAID. Payment required to take exams.";
+        Color statusColor = amountDue <= 0 ? 
+            new Color(0, 150, 0) : // Green for paid
+            new Color(200, 0, 0);   // Red for unpaid
+        
+        JLabel statusLabel = new JLabel(statusText);
+        statusLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        statusLabel.setForeground(statusColor);
+        contentPanel.add(statusLabel);
+        contentPanel.add(Box.createVerticalStrut(20));
+
+        // Breakdown of Fees
+        JPanel breakdownPanel = createBreakdownPanel();
+        contentPanel.add(breakdownPanel);
+        contentPanel.add(Box.createVerticalStrut(20));
+
+        // Online Payment Transactions
+        JPanel transactionsPanel = createTransactionsPanel();
+        contentPanel.add(transactionsPanel);
+
+        panel.add(contentPanel, BorderLayout.CENTER);
+        return panel;
+    }
+
+    private JPanel createBreakdownPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Color.WHITE);
+
+        // Header
+        JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        headerPanel.setBackground(new Color(10, 45, 90));
+        headerPanel.setPreferredSize(new Dimension(0, 40));
+        
+        JLabel headerLabel = new JLabel("Breakdown of fees as of September 08, 2025");
+        headerLabel.setForeground(Color.WHITE);
+        headerLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        headerPanel.add(headerLabel);
+        
+        panel.add(headerPanel, BorderLayout.NORTH);
+
+        // Table
+        String[] columnNames = {"Date", "Description", "Amount"};
+        Object[][] data = {
+            {"", "BEGINNING BALANCE", "21177"},
+            {"08/12/2025", "BPI ONLINE- 2025-08-10 (JV100106)", "(21,177.00)"}
+        };
+
+        DefaultTableModel model = new DefaultTableModel(data, columnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        JTable table = new JTable(model);
+        table.setRowHeight(30);
+        table.getTableHeader().setBackground(new Color(240, 240, 240));
+        
+        JScrollPane scrollPane = new JScrollPane(table);
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        return panel;
+    }
+
+    private JPanel createTransactionsPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Color.WHITE);
+
+        // Header
+        JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        headerPanel.setBackground(new Color(10, 45, 90));
+        headerPanel.setPreferredSize(new Dimension(0, 40));
+        
+        JLabel headerLabel = new JLabel("Online Payment Transactions");
+        headerLabel.setForeground(Color.WHITE);
+        headerLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        headerPanel.add(headerLabel);
+        
+        panel.add(headerPanel, BorderLayout.NORTH);
+
+        // Table
+        String[] columnNames = {"Date", "Channel", "Reference", "Amount"};
+        
+        // Load existing payment data from file
+        Object[][] data = loadPaymentTransactions();
+
+        paymentTableModel = new DefaultTableModel(data, columnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        JTable table = new JTable(paymentTableModel);
+        table.setRowHeight(30);
+        table.getTableHeader().setBackground(new Color(240, 240, 240));
+        
+        JScrollPane scrollPane = new JScrollPane(table);
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        return panel;
+    }
+
+    /**
+     * Creates the Transcript of Records panel matching the UI design
+     */
+    private JPanel createTranscriptOfRecordsPanel() {
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(new Color(240, 240, 240));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Content panel
+        JPanel contentPanel = new JPanel(new BorderLayout());
+        contentPanel.setBackground(Color.WHITE);
+        contentPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(20, 20, 20, 20)
+        ));
+
+        // Header - Transcript of Records
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(new Color(10, 45, 90));
+        headerPanel.setPreferredSize(new Dimension(0, 50));
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        
+        JLabel headerLabel = new JLabel("📋 Transcript of Records");
+        headerLabel.setForeground(Color.WHITE);
+        headerLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        headerPanel.add(headerLabel, BorderLayout.WEST);
+        
+        contentPanel.add(headerPanel, BorderLayout.NORTH);
+
+        // Create transcript table with all semesters
+        String[] columnNames = {"Course Number", "Descriptive Title", "Grade", "Units"};
+        
+        // Generate random grades (76-99)
+        Object[][] transcriptData = generateTranscriptData();
+        
+        DefaultTableModel transcriptModel = new DefaultTableModel(transcriptData, columnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Make all cells non-editable
+            }
+        };
+
+        JTable transcriptTable = new JTable(transcriptModel);
+        transcriptTable.setRowHeight(30);
+        transcriptTable.getTableHeader().setReorderingAllowed(false);
+        transcriptTable.setAutoCreateRowSorter(false);
+        transcriptTable.setShowGrid(true);
+        transcriptTable.setGridColor(new Color(200, 200, 200));
+        transcriptTable.setFont(new Font("Arial", Font.PLAIN, 12));
+        
+        // Style the table
+        transcriptTable.getTableHeader().setBackground(new Color(240, 240, 240));
+        transcriptTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        
+        // Set column alignments
+        transcriptTable.getColumnModel().getColumn(0).setCellRenderer(new javax.swing.table.DefaultTableCellRenderer() {
+            @Override
+            public java.awt.Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                setHorizontalAlignment(SwingConstants.LEFT);
+                return this;
+            }
+        });
+        
+        transcriptTable.getColumnModel().getColumn(1).setCellRenderer(new javax.swing.table.DefaultTableCellRenderer() {
+            @Override
+            public java.awt.Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                setHorizontalAlignment(SwingConstants.LEFT);
+                return this;
+            }
+        });
+        
+        transcriptTable.getColumnModel().getColumn(2).setCellRenderer(new javax.swing.table.DefaultTableCellRenderer() {
+            @Override
+            public java.awt.Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                setHorizontalAlignment(SwingConstants.RIGHT);
+                return this;
+            }
+        });
+        
+        transcriptTable.getColumnModel().getColumn(3).setCellRenderer(new javax.swing.table.DefaultTableCellRenderer() {
+            @Override
+            public java.awt.Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                setHorizontalAlignment(SwingConstants.RIGHT);
+                return this;
+            }
+        });
+
+        JScrollPane scrollPane = new JScrollPane(transcriptTable);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        contentPanel.add(scrollPane, BorderLayout.CENTER);
+
+        mainPanel.add(contentPanel, BorderLayout.CENTER);
+        return mainPanel;
+    }
+
+    private JPanel createPaymentChannelsPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(0, 0, 0, 0)
+        ));
+
+        // Header
+        JPanel headerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        headerPanel.setBackground(new Color(10, 45, 90));
+        headerPanel.setPreferredSize(new Dimension(0, 50));
+        
+        JLabel headerLabel = new JLabel("Online Payment Channels");
+        headerLabel.setForeground(Color.WHITE);
+        headerLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        headerPanel.add(headerLabel);
+        
+        panel.add(headerPanel, BorderLayout.NORTH);
+
+        // Content
+        JPanel contentPanel = new JPanel();
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        contentPanel.setBackground(new Color(240, 240, 240));
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        JLabel instructionLabel = new JLabel("Tuition fees can be paid via the available online payment channels.");
+        instructionLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        instructionLabel.setForeground(Color.DARK_GRAY);
+        contentPanel.add(instructionLabel);
+        contentPanel.add(Box.createVerticalStrut(20));
+
+        // Payment channel buttons
+        String[] channels = {
+            "UnionBank UPay Online",
+            "Dragonpay Payment Gateway", 
+            "BPI BPI Online",
+            "BDO BDO Online",
+            "BDO Bills Payment",
+            "Bukas Tuition Installment Plans"
+        };
+
+        Color[] colors = {
+            new Color(255, 140, 0), // Orange
+            new Color(255, 69, 0),  // Red-Orange
+            new Color(220, 20, 60), // Crimson
+            new Color(0, 100, 200), // Blue
+            new Color(0, 100, 200), // Blue
+            new Color(135, 206, 235) // Light Blue
+        };
+
+        for (int i = 0; i < channels.length; i++) {
+            JButton channelButton = new JButton(channels[i]);
+            channelButton.setBackground(colors[i]);
+            channelButton.setForeground(Color.WHITE);
+            channelButton.setFont(new Font("Arial", Font.BOLD, 12));
+            channelButton.setPreferredSize(new Dimension(250, 40));
+            channelButton.setFocusPainted(false);
+            channelButton.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
+            
+            // Add action listener for payment processing
+            final String channelName = channels[i];
+            channelButton.addActionListener(e -> showPaymentDialog(channelName));
+            
+            contentPanel.add(channelButton);
+            contentPanel.add(Box.createVerticalStrut(10));
+        }
+
+        panel.add(contentPanel, BorderLayout.CENTER);
+        return panel;
+    }
+
+    // Fields to track payment information
+    private double currentBalance; // Current overpayment amount (randomized)
+    private double amountDue; // Current amount due (randomized)
+    private JLabel overpaymentValueLabel; // Reference to update the display
+    private JLabel amountDueValueLabel; // Reference to update the amount due display
+    private DefaultTableModel paymentTableModel; // Reference to payment transactions table model
+
+    /**
+     * Shows payment dialog to collect card information and process payment
+     */
+    private void showPaymentDialog(String channelName) {
+        JDialog paymentDialog = new JDialog(this, "Payment - " + channelName, true);
+        paymentDialog.setSize(500, 400);
+        paymentDialog.setLocationRelativeTo(this);
+        paymentDialog.setLayout(new BorderLayout());
+
+        // Header
+        JPanel headerPanel = new JPanel();
+        headerPanel.setBackground(new Color(10, 45, 90));
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
+        
+        JLabel headerLabel = new JLabel("Payment Information - " + channelName);
+        headerLabel.setForeground(Color.WHITE);
+        headerLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        headerPanel.add(headerLabel);
+        
+        paymentDialog.add(headerPanel, BorderLayout.NORTH);
+
+        // Main content panel
+        JPanel contentPanel = new JPanel();
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        contentPanel.setBackground(Color.WHITE);
+
+        // Card Number
+        JPanel cardNumberPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
+        cardNumberPanel.setBackground(Color.WHITE);
+        JLabel cardNumberLabel = new JLabel("Card Number (16 digits):");
+        cardNumberLabel.setPreferredSize(new Dimension(150, 25));
+        cardNumberPanel.add(cardNumberLabel);
+        
+        JTextField cardNumberField = new JTextField();
+        cardNumberField.setPreferredSize(new Dimension(200, 25));
+        cardNumberField.setDocument(new CardNumberDocument()); // Custom document for formatting
+        cardNumberPanel.add(cardNumberField);
+        contentPanel.add(cardNumberPanel);
+        contentPanel.add(Box.createVerticalStrut(15));
+
+        // CVV
+        JPanel cvvPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
+        cvvPanel.setBackground(Color.WHITE);
+        JLabel cvvLabel = new JLabel("CVV (3 digits):");
+        cvvLabel.setPreferredSize(new Dimension(150, 25));
+        cvvPanel.add(cvvLabel);
+        
+        JTextField cvvField = new JTextField();
+        cvvField.setPreferredSize(new Dimension(100, 25));
+        cvvField.setDocument(new CVVDocument()); // Custom document for 3 digits only
+        cvvPanel.add(cvvField);
+        contentPanel.add(cvvPanel);
+        contentPanel.add(Box.createVerticalStrut(15));
+
+        // Expiration Date
+        JPanel expDatePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
+        expDatePanel.setBackground(Color.WHITE);
+        JLabel expDateLabel = new JLabel("Expiration Date (MM/YY):");
+        expDateLabel.setPreferredSize(new Dimension(150, 25));
+        expDatePanel.add(expDateLabel);
+        
+        JTextField expDateField = new JTextField();
+        expDateField.setPreferredSize(new Dimension(100, 25));
+        expDateField.setDocument(new ExpirationDateDocument()); // Custom document for MM/YY format
+        expDatePanel.add(expDateField);
+        contentPanel.add(expDatePanel);
+        contentPanel.add(Box.createVerticalStrut(15));
+
+        // Card Holder Name
+        JPanel namePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
+        namePanel.setBackground(Color.WHITE);
+        JLabel nameLabel = new JLabel("Card Holder Name:");
+        nameLabel.setPreferredSize(new Dimension(150, 25));
+        namePanel.add(nameLabel);
+        
+        JTextField nameField = new JTextField();
+        nameField.setPreferredSize(new Dimension(200, 25));
+        namePanel.add(nameField);
+        contentPanel.add(namePanel);
+        contentPanel.add(Box.createVerticalStrut(20));
+
+        // Amount to Pay
+        JPanel amountPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 5));
+        amountPanel.setBackground(Color.WHITE);
+        JLabel amountLabel = new JLabel("Amount to Pay:");
+        amountLabel.setPreferredSize(new Dimension(150, 25));
+        amountPanel.add(amountLabel);
+        
+        JTextField amountField = new JTextField();
+        amountField.setPreferredSize(new Dimension(150, 25));
+        amountPanel.add(amountField);
+        contentPanel.add(amountPanel);
+        contentPanel.add(Box.createVerticalStrut(20));
+
+        // Buttons panel
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
+        buttonPanel.setBackground(Color.WHITE);
+        
+        JButton submitButton = new JButton("Submit Payment");
+        submitButton.setBackground(new Color(0, 150, 0));
+        submitButton.setForeground(Color.WHITE);
+        submitButton.setFont(new Font("Arial", Font.BOLD, 12));
+        submitButton.setPreferredSize(new Dimension(120, 35));
+        submitButton.addActionListener(e -> {
+            if (processPayment(cardNumberField.getText(), cvvField.getText(), 
+                             expDateField.getText(), nameField.getText(), 
+                             amountField.getText(), channelName)) {
+                paymentDialog.dispose();
+            }
+        });
+        
+        JButton cancelButton = new JButton("Cancel");
+        cancelButton.setBackground(new Color(200, 0, 0));
+        cancelButton.setForeground(Color.WHITE);
+        cancelButton.setFont(new Font("Arial", Font.BOLD, 12));
+        cancelButton.setPreferredSize(new Dimension(80, 35));
+        cancelButton.addActionListener(e -> paymentDialog.dispose());
+        
+        buttonPanel.add(submitButton);
+        buttonPanel.add(cancelButton);
+        contentPanel.add(buttonPanel);
+
+        paymentDialog.add(contentPanel, BorderLayout.CENTER);
+        paymentDialog.setVisible(true);
+    }
+
+    /**
+     * Processes the payment and updates the balance
+     */
+    private boolean processPayment(String cardNumber, String cvv, String expDate, 
+                                 String cardHolderName, String amountStr, String channelName) {
+        // Validate inputs
+        if (cardNumber.replaceAll("\\s", "").length() != 16) {
+            JOptionPane.showMessageDialog(this, "Card number must be 16 digits", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        if (cvv.length() != 3) {
+            JOptionPane.showMessageDialog(this, "CVV must be 3 digits", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        if (!expDate.matches("\\d{2}/\\d{2}")) {
+            JOptionPane.showMessageDialog(this, "Expiration date must be in MM/YY format", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        if (cardHolderName.trim().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Card holder name is required", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        
+        double amount;
+        try {
+            amount = Double.parseDouble(amountStr);
+            if (amount <= 0) {
+                JOptionPane.showMessageDialog(this, "Amount must be greater than 0", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Invalid amount format", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+
+        // Process payment - handle overpayment if amount exceeds amount due
+        if (amount >= amountDue) {
+            // Calculate overpayment amount
+            double overpaymentAmount = amount - amountDue;
+            
+            // Clear the amount due and add excess to overpayment
+            amountDue = 0.0;
+            currentBalance += overpaymentAmount;
+            
+            // Log the payment transaction
+            logPaymentTransaction(channelName, amount);
+            
+            // Add payment to table
+            addPaymentToTable(channelName, amount);
+            
+            // Show success message with overpayment details
+            String message = "Payment successful!\n" +
+                "Channel: " + channelName + "\n" +
+                "Amount Paid: P " + String.format("%.2f", amount) + "\n" +
+                "Amount Due: P 0.00 (FULLY PAID)\n" +
+                "Overpayment: P " + String.format("%.2f", overpaymentAmount) + "\n" +
+                "Total Overpayment Balance: P " + String.format("%.2f", currentBalance);
+            
+            JOptionPane.showMessageDialog(this, message, "Payment Successful", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            // Partial payment - just reduce amount due
+            amountDue -= amount;
+            
+            // Log the payment transaction
+            logPaymentTransaction(channelName, amount);
+            
+            // Add payment to table
+            addPaymentToTable(channelName, amount);
+            
+            // Show success message
+            JOptionPane.showMessageDialog(this, 
+                "Payment successful!\n" +
+                "Channel: " + channelName + "\n" +
+                "Amount Paid: P " + String.format("%.2f", amount) + "\n" +
+                "Remaining Amount Due: P " + String.format("%.2f", amountDue),
+                "Payment Successful", 
+                JOptionPane.INFORMATION_MESSAGE);
+        }
+
+        // Update the display (you would need to refresh the Statement of Accounts panel)
+        refreshStatementOfAccounts();
+        
+        return true;
+    }
+
+    /**
+     * Loads payment transactions using DataManager
+     */
+    private Object[][] loadPaymentTransactions() {
+        java.util.List<PaymentTransaction> transactions = DataManager.loadPaymentTransactions(studentID);
+        
+        if (transactions.isEmpty()) {
+            return new Object[0][4];
+        }
+        
+        // Convert to 2D array
+        Object[][] result = new Object[transactions.size()][4];
+        for (int i = 0; i < transactions.size(); i++) {
+            result[i] = transactions.get(i).toTableRow();
+        }
+        
+        return result;
+    }
+
+    /**
+     * Logs payment transaction using DataManager
+     */
+    private void logPaymentTransaction(String channelName, double amount) {
+        DataManager.logPaymentTransaction(channelName, amount, studentID);
+    }
+
+    /**
+     * Adds a new payment transaction to the table
+     */
+    private void addPaymentToTable(String channelName, double amount) {
+        if (paymentTableModel != null) {
+            // Generate current date and time
+            java.text.SimpleDateFormat dateFormat = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm a");
+            String currentDateTime = dateFormat.format(new java.util.Date());
+            
+            // Create reference text
+            String reference = "FIRST SEMESTER 2025-2026 Enrollme.";
+            
+            // Format amount with comma separator
+            String formattedAmount = String.format("P %,.2f", amount);
+            
+            // Add new row to table
+            paymentTableModel.addRow(new Object[]{currentDateTime, channelName, reference, formattedAmount});
+        }
+    }
+
+    /**
+     * Refreshes the Statement of Accounts display with updated balance
+     */
+    private void refreshStatementOfAccounts() {
+        // Update the amount due value label if it exists
+        if (amountDueValueLabel != null) {
+            amountDueValueLabel.setText("P " + String.format("%.2f", amountDue));
+        }
+        
+        // Update the overpayment value label if it exists
+        if (overpaymentValueLabel != null) {
+            overpaymentValueLabel.setText("P (" + String.format("%.2f", currentBalance) + ")");
+        }
+        
+        // Show success message with both balances
+        String message = "Statement of Accounts has been updated.\n" +
+            "Amount Due: P " + String.format("%.2f", amountDue) + "\n" +
+            "Overpayment Balance: P " + String.format("%.2f", currentBalance);
+        
+        JOptionPane.showMessageDialog(this, message, "Balance Updated", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    // Custom Document classes for input formatting
+    private static class CardNumberDocument extends javax.swing.text.PlainDocument {
+        @Override
+        public void insertString(int offs, String str, javax.swing.text.AttributeSet a) throws javax.swing.text.BadLocationException {
+            if (str == null) return;
+            
+            String currentText = getText(0, getLength());
+            String newText = currentText.substring(0, offs) + str + currentText.substring(offs);
+            newText = newText.replaceAll("\\D", ""); // Remove non-digits
+            
+            if (newText.length() <= 16) {
+                // Format with spaces every 4 digits
+                StringBuilder formatted = new StringBuilder();
+                for (int i = 0; i < newText.length(); i++) {
+                    if (i > 0 && i % 4 == 0) {
+                        formatted.append(" ");
+                    }
+                    formatted.append(newText.charAt(i));
+                }
+                super.remove(0, getLength());
+                super.insertString(0, formatted.toString(), a);
+            }
+        }
+    }
+
+    private static class CVVDocument extends javax.swing.text.PlainDocument {
+        @Override
+        public void insertString(int offs, String str, javax.swing.text.AttributeSet a) throws javax.swing.text.BadLocationException {
+            if (str == null) return;
+            
+            String currentText = getText(0, getLength());
+            String newText = currentText.substring(0, offs) + str + currentText.substring(offs);
+            newText = newText.replaceAll("\\D", ""); // Remove non-digits
+            
+            if (newText.length() <= 3) {
+                super.remove(0, getLength());
+                super.insertString(0, newText, a);
+            }
+        }
+    }
+
+    private static class ExpirationDateDocument extends javax.swing.text.PlainDocument {
+        @Override
+        public void insertString(int offs, String str, javax.swing.text.AttributeSet a) throws javax.swing.text.BadLocationException {
+            if (str == null) return;
+            
+            String currentText = getText(0, getLength());
+            String newText = currentText.substring(0, offs) + str + currentText.substring(offs);
+            newText = newText.replaceAll("\\D", ""); // Remove non-digits
+            
+            if (newText.length() <= 4) {
+                // Format as MM/YY
+                StringBuilder formatted = new StringBuilder();
+                for (int i = 0; i < newText.length(); i++) {
+                    if (i == 2) {
+                        formatted.append("/");
+                    }
+                    formatted.append(newText.charAt(i));
+                }
+                super.remove(0, getLength());
+                super.insertString(0, formatted.toString(), a);
+            }
+        }
+    }
+}
