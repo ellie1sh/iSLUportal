@@ -500,6 +500,9 @@ public class ISLUStudentPortal extends JFrame {
             case "📋 Transcript of Records":
                 contentPanel.add(createTranscriptOfRecordsPanel());
                 break;
+            case "✅ Curriculum Checklist":
+                contentPanel.add(createCurriculumChecklistPanel());
+                break;
             case "ℹ️ Downloadable/ About iSLU":
                 contentPanel.add(createAboutISLUPanel());
                 break;
@@ -1103,9 +1106,11 @@ public class ISLUStudentPortal extends JFrame {
         LinkedList<String> TORSubList = new LinkedList<>();
         return TORSubList;
     }
-    // TO DO
     private LinkedList<String> createCurriculumChecklistSubList(){
         LinkedList<String> CurriculumChecklistSubList = new LinkedList<>();
+        CurriculumChecklistSubList.add("Course Number");
+        CurriculumChecklistSubList.add("Course Description");
+        CurriculumChecklistSubList.add("Units");
         return CurriculumChecklistSubList;
     }
     // TO DO
@@ -2252,5 +2257,167 @@ public class ISLUStudentPortal extends JFrame {
             "Medical Clinic",
             "Technology Management and Development Department"
         };
+    }
+
+    /**
+     * Creates the Curriculum Checklist panel matching the UI design from the image
+     */
+    private JPanel createCurriculumChecklistPanel() {
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(new Color(240, 240, 240));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Content panel
+        JPanel contentPanel = new JPanel(new BorderLayout());
+        contentPanel.setBackground(Color.WHITE);
+        contentPanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(20, 20, 20, 20)
+        ));
+
+        // Header with program info
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(new Color(13, 37, 73)); // Dark blue matching the sidebar
+        headerPanel.setPreferredSize(new Dimension(0, 80));
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
+        
+        JPanel headerTextPanel = new JPanel();
+        headerTextPanel.setLayout(new BoxLayout(headerTextPanel, BoxLayout.Y_AXIS));
+        headerTextPanel.setBackground(new Color(13, 37, 73));
+        
+        JLabel programLabel = new JLabel("✅ BACHELOR OF SCIENCE IN INFORMATION TECHNOLOGY FIRST SEMESTER, 2018-2019");
+        programLabel.setForeground(Color.WHITE);
+        programLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        headerTextPanel.add(programLabel);
+        
+        JLabel noteLabel = new JLabel("NOTE: For inquiries regarding your checklist please proceed to your respective Dean's offices.");
+        noteLabel.setForeground(new Color(200, 200, 200));
+        noteLabel.setFont(new Font("Arial", Font.ITALIC, 11));
+        headerTextPanel.add(Box.createVerticalStrut(5));
+        headerTextPanel.add(noteLabel);
+        
+        headerPanel.add(headerTextPanel, BorderLayout.WEST);
+        contentPanel.add(headerPanel, BorderLayout.NORTH);
+
+        // Create curriculum table with all courses
+        String[] columnNames = {"Course Number", "Course Description", "Units"};
+        
+        // Generate curriculum data based on the image structure
+        Object[][] curriculumData = generateCurriculumData();
+        
+        DefaultTableModel curriculumModel = new DefaultTableModel(curriculumData, columnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Make all cells non-editable
+            }
+        };
+
+        JTable curriculumTable = new JTable(curriculumModel);
+        curriculumTable.setRowHeight(25);
+        curriculumTable.getTableHeader().setReorderingAllowed(false);
+        curriculumTable.setAutoCreateRowSorter(false);
+        curriculumTable.setShowGrid(true);
+        curriculumTable.setGridColor(new Color(200, 200, 200));
+        curriculumTable.setFont(new Font("Arial", Font.PLAIN, 12));
+        
+        // Style the table
+        curriculumTable.getTableHeader().setBackground(new Color(240, 240, 240));
+        curriculumTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+        
+        // Custom renderer to show checkmarks and format semester headers
+        curriculumTable.setDefaultRenderer(Object.class, new javax.swing.table.DefaultTableCellRenderer() {
+            @Override
+            public java.awt.Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                
+                String cellValue = value != null ? value.toString() : "";
+                
+                // Check if this is a semester header row
+                if (column == 0 && (cellValue.contains("First Year") || cellValue.contains("Second Year") || cellValue.contains("Short Term"))) {
+                    setBackground(new Color(240, 240, 240));
+                    setFont(new Font("Arial", Font.BOLD, 12));
+                    setHorizontalAlignment(SwingConstants.LEFT);
+                } else if (column == 0 && cellValue.startsWith("✓")) {
+                    // Course with checkmark
+                    setBackground(Color.WHITE);
+                    setFont(new Font("Arial", Font.PLAIN, 12));
+                    setHorizontalAlignment(SwingConstants.LEFT);
+                } else {
+                    setBackground(Color.WHITE);
+                    setFont(new Font("Arial", Font.PLAIN, 12));
+                    if (column == 2) { // Units column
+                        setHorizontalAlignment(SwingConstants.CENTER);
+                    } else {
+                        setHorizontalAlignment(SwingConstants.LEFT);
+                    }
+                }
+                
+                if (isSelected) {
+                    setBackground(new Color(184, 207, 229));
+                }
+                
+                return this;
+            }
+        });
+
+        JScrollPane scrollPane = new JScrollPane(curriculumTable);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        contentPanel.add(scrollPane, BorderLayout.CENTER);
+
+        mainPanel.add(contentPanel, BorderLayout.CENTER);
+        return mainPanel;
+    }
+
+    /**
+     * Generates curriculum data matching the BSIT program structure from the image
+     */
+    private Object[][] generateCurriculumData() {
+        java.util.List<Object[]> data = new java.util.ArrayList<>();
+        
+        // FIRST YEAR, FIRST SEMESTER
+        data.add(new Object[]{"First Year, First Semester", "", ""});
+        data.add(new Object[]{"✓ CFE 101", "GOD'S JOURNEY WITH HIS PEOPLE", "3"});
+        data.add(new Object[]{"✓ FIT HW", "PHYSICAL ACTIVITY TOWARDS HEALTH AND FITNESS (HEALTH AND WELLNESS)", "2"});
+        data.add(new Object[]{"✓ GART", "ART APPRECIATION", "3"});
+        data.add(new Object[]{"✓ GHIST", "READINGS IN PHILIPPINE HISTORY", "3"});
+        data.add(new Object[]{"✓ GSELF", "UNDERSTANDING THE SELF", "3"});
+        data.add(new Object[]{"✓ IT 111", "INTRODUCTION TO COMPUTING (LEC)", "2"});
+        data.add(new Object[]{"✓ IT 111L", "INTRODUCTION TO COMPUTING (LAB)", "1"});
+        data.add(new Object[]{"✓ IT 112", "COMPUTER PROGRAMMING 1 (LEC)", "2"});
+        data.add(new Object[]{"✓ IT 112L", "COMPUTER PROGRAMMING 1 (LAB)", "1"});
+        data.add(new Object[]{"✓ IT 113", "DISCRETE MATHEMATICS", "3"});
+        
+        // FIRST YEAR, SECOND SEMESTER
+        data.add(new Object[]{"First Year, Second Semester", "", ""});
+        data.add(new Object[]{"✓ CFE 102", "CHRISTIAN MORALITY IN OUR TIMES", "3"});
+        data.add(new Object[]{"✓ FIT CS", "PHYSICAL ACTIVITY TOWARDS HEALTH AND FITNESS (COMBATIVE SPORTS)", "2"});
+        data.add(new Object[]{"✓ GCWORLD", "THE CONTEMPORARY WORLD", "3"});
+        data.add(new Object[]{"✓ GMATH", "MATHEMATICS IN THE MODERN WORLD", "3"});
+        data.add(new Object[]{"✓ GPCOM", "PURPOSIVE COMMUNICATION", "3"});
+        data.add(new Object[]{"✓ IT 121", "INFORMATION SYSTEM FUNDAMENTALS", "3"});
+        data.add(new Object[]{"✓ IT 122", "COMPUTER PROGRAMMING 2", "2"});
+        data.add(new Object[]{"✓ IT 122L", "COMPUTER PROGRAMMING 2 (LAB)", "1"});
+        data.add(new Object[]{"✓ IT 123", "PLATFORM TECHNOLOGIES", "2"});
+        data.add(new Object[]{"✓ IT 123L", "PLATFORM TECHNOLOGIES (LAB)", "1"});
+        
+        // FIRST YEAR, SHORT TERM
+        data.add(new Object[]{"First Year, Short Term", "", ""});
+        data.add(new Object[]{"✓ GRIZAL", "THE LIFE AND WORKS OF RIZAL", "3"});
+        data.add(new Object[]{"✓ IT 131", "COMPUTER ARCHITECTURE", "2"});
+        data.add(new Object[]{"✓ IT 131L", "COMPUTER ARCHITECTURE (LAB)", "1"});
+        
+        // SECOND YEAR, FIRST SEMESTER (Current)
+        data.add(new Object[]{"Second Year, First Semester", "", ""});
+        data.add(new Object[]{"CFE 103", "CATHOLIC FOUNDATION OF MISSION", "3"});
+        data.add(new Object[]{"FIT OA", "PHYSICAL ACTIVITY TOWARDS HEALTH AND FITNESS (OUTDOOR AND ADVENTURE ACTIVITIES)", "3"});
+        data.add(new Object[]{"GENVI", "ENVIRONMENTAL SCIENCE", "3"});
+        data.add(new Object[]{"GSTS", "SCIENCE, TECHNOLOGY, AND SOCIETY", "3"});
+        data.add(new Object[]{"IT 211", "REQUIREMENTS ANALYSIS AND MODELING", "3"});
+        data.add(new Object[]{"IT 212", "DATA STRUCTURES (LEC)", "2"});
+        data.add(new Object[]{"IT 212L", "DATA STRUCTURES (LAB)", "1"});
+        data.add(new Object[]{"IT 213", "NETWORK FUNDAMENTALS (LEC)", "2"});
+        data.add(new Object[]{"IT 213L", "NETWORK FUNDAMENTALS (LAB)", "1"});
+        
+        return data.toArray(new Object[data.size()][3]);
     }
 }
