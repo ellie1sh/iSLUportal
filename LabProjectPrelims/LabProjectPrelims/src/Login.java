@@ -17,6 +17,8 @@ public class Login extends JFrame {
     private int originalLogoHeight;
 
     public Login() {
+        // Ensure required storage files exist to avoid false "database not found" errors
+        DataManager.ensureStorageInitialized();
         setTitle("Login Page");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -160,10 +162,12 @@ public class Login extends JFrame {
 
             // Authenticate against Database.txt
             if (authenticateUser(enteredID, enteredPassword)) {
+                DataManager.logLoginAttempt(enteredID, true);
                 // If authentication successful → go to HomePage
                 dispose(); // close login
                 new ISLUStudentPortal(enteredID).setVisible(true); // open your HomePage class with student ID
             } else {
+                DataManager.logLoginAttempt(enteredID, false);
                 // If authentication failed
                 JOptionPane.showMessageDialog(this, 
                     "Invalid ID Number or Password.\nPlease check your credentials and try again.", 
@@ -270,20 +274,15 @@ public class Login extends JFrame {
      * @return true if credentials match, false otherwise
      */
     private boolean authenticateUser(String enteredID, String enteredPassword) {
-        boolean isValid = DataManager.authenticateUser(enteredID, enteredPassword);
-        
-        if (!isValid) {
-            // Check if database file exists
-            File databaseFile = new File("Database.txt");
-            if (!databaseFile.exists()) {
-                JOptionPane.showMessageDialog(this, 
-                    "Database not found. Please contact administrator.", 
-                    "Database Error", 
-                    JOptionPane.ERROR_MESSAGE);
-            }
+        if (!DataManager.databaseExists()) {
+            JOptionPane.showMessageDialog(this,
+                "Database not found. Please contact administrator.",
+                "Database Error",
+                JOptionPane.ERROR_MESSAGE);
+            return false;
         }
-        
-        return isValid;
+
+        return DataManager.authenticateUser(enteredID, enteredPassword);
     }
 
     public static void main(String[] args) {

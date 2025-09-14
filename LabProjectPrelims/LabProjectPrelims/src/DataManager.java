@@ -11,6 +11,88 @@ public class DataManager {
     private static final String DATABASE_FILE = "Database.txt";
     private static final String USER_PASSWORD_FILE = "UserPasswordID.txt";
     private static final String PAYMENT_LOGS_FILE = "paymentLogs.txt";
+    private static final String LOGIN_LOGS_FILE = "loginLogs.txt";
+
+    // Resolve data files robustly regardless of current working directory
+    private static File resolveDataFile(String fileName) {
+        List<File> candidates = new ArrayList<>();
+
+        // 1) Current working directory
+        String userDir = System.getProperty("user.dir");
+        if (userDir != null) {
+            candidates.add(new File(userDir, fileName));
+        }
+
+        // 2) Code source directory (e.g., out/production or JAR location) and its parents
+        try {
+            java.net.URL codeSourceUrl = DataManager.class.getProtectionDomain().getCodeSource().getLocation();
+            File codeSource = new File(codeSourceUrl.toURI());
+            File dir = codeSource.isFile() ? codeSource.getParentFile() : codeSource;
+            for (int i = 0; i < 6 && dir != null; i++) {
+                candidates.add(new File(dir, fileName));
+                dir = dir.getParentFile();
+            }
+        } catch (Exception ignored) {}
+
+        // 3) Project-specific known relative directory
+        candidates.add(new File("LabProjectPrelims/LabProjectPrelims/" + fileName));
+        candidates.add(new File("../LabProjectPrelims/LabProjectPrelims/" + fileName));
+
+        // 4) Parent of current working directory
+        if (userDir != null) {
+            File parent = new File(userDir).getParentFile();
+            if (parent != null) {
+                candidates.add(new File(parent, fileName));
+            }
+        }
+
+        // Return the first existing candidate
+        for (File f : candidates) {
+            if (f.exists()) {
+                return f;
+            }
+        }
+
+        // If none exist, prefer writing into a stable, project-friendly location if available
+        File preferredProjectDir = new File("LabProjectPrelims/LabProjectPrelims");
+        if (preferredProjectDir.isDirectory()) {
+            return new File(preferredProjectDir, fileName);
+        }
+
+        // Fallback to current working directory
+        return new File(fileName);
+    }
+
+    private static File getDatabaseFile() { return resolveDataFile(DATABASE_FILE); }
+    private static File getUserPasswordFile() { return resolveDataFile(USER_PASSWORD_FILE); }
+    private static File getPaymentLogsFile() { return resolveDataFile(PAYMENT_LOGS_FILE); }
+    private static File getLoginLogsFile() { return resolveDataFile(LOGIN_LOGS_FILE); }
+
+    public static boolean databaseExists() { return getDatabaseFile().exists(); }
+
+    public static void ensureStorageInitialized() {
+        try {
+            // Ensure database and credentials files exist
+            File db = getDatabaseFile();
+            if (!db.exists()) {
+                File parent = db.getParentFile();
+                if (parent != null) parent.mkdirs();
+                db.createNewFile();
+            }
+            File creds = getUserPasswordFile();
+            if (!creds.exists()) {
+                File parent = creds.getParentFile();
+                if (parent != null) parent.mkdirs();
+                creds.createNewFile();
+            }
+            File loginLog = getLoginLogsFile();
+            if (!loginLog.exists()) {
+                File parent = loginLog.getParentFile();
+                if (parent != null) parent.mkdirs();
+                loginLog.createNewFile();
+            }
+        } catch (IOException ignored) {}
+    }
     
     /**
      * Authenticates user credentials against the database
@@ -20,7 +102,7 @@ public class DataManager {
      */
     public static boolean authenticateUser(String studentID, String password) {
         try {
-            File databaseFile = new File(DATABASE_FILE);
+            File databaseFile = getDatabaseFile();
             if (!databaseFile.exists()) {
                 return false;
             }
@@ -53,7 +135,7 @@ public class DataManager {
      */
     public static StudentInfo getStudentInfo(String studentID) {
         try {
-            File databaseFile = new File(DATABASE_FILE);
+            File databaseFile = getDatabaseFile();
             if (!databaseFile.exists()) {
                 return null;
             }
@@ -92,14 +174,18 @@ public class DataManager {
      */
     public static boolean saveStudentAccount(StudentInfo studentInfo) {
         try {
+            ensureStorageInitialized();
+
             // Save to Database.txt
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(DATABASE_FILE, true))) {
+            File db = getDatabaseFile();
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(db, true))) {
                 writer.write(studentInfo.toDatabaseFormat());
                 writer.newLine();
             }
             
             // Save to UserPasswordID.txt
-            try (BufferedWriter logWriter = new BufferedWriter(new FileWriter(USER_PASSWORD_FILE, true))) {
+            File userPass = getUserPasswordFile();
+            try (BufferedWriter logWriter = new BufferedWriter(new FileWriter(userPass, true))) {
                 logWriter.write("ID: " + studentInfo.getId() + " | Password: " + studentInfo.getPassword());
                 logWriter.newLine();
             }
@@ -119,7 +205,7 @@ public class DataManager {
         Set<String> usedIDs = new HashSet<>();
         
         try {
-            File file = new File(DATABASE_FILE);
+            File file = getDatabaseFile();
             if (file.exists()) {
                 try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
                     String line;
@@ -153,7 +239,7 @@ public class DataManager {
      */
     public static void logPaymentTransaction(String channelName, double amount, String studentID) {
         try {
-            File logFile = new File(PAYMENT_LOGS_FILE);
+            File logFile = getPaymentLogsFile();
             
             java.text.SimpleDateFormat dateFormat = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm a");
             String currentDateTime = dateFormat.format(new java.util.Date());
@@ -171,6 +257,27 @@ public class DataManager {
             System.err.println("Error writing to payment log: " + e.getMessage());
         }
     }
+
+    /**
+     * Logs a login attempt (success or failure) with timestamp
+     * @param studentID The attempted student ID
+     * @param success Whether the login was successful
+     */
+    public static void logLoginAttempt(String studentID, boolean success) {
+        try {
+            File logFile = getLoginLogsFile();
+            java.text.SimpleDateFormat dateFormat = new java.text.SimpleDateFormat("MM/dd/yyyy hh:mm a");
+            String currentDateTime = dateFormat.format(new java.util.Date());
+            String status = success ? "SUCCESS" : "FAILURE";
+            String entry = currentDateTime + "," + studentID + "," + status;
+            try (BufferedWriter writer = new BufferedWriter(new FileWriter(logFile, true))) {
+                writer.write(entry);
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.err.println("Error writing to login log: " + e.getMessage());
+        }
+    }
     
     /**
      * Loads payment transactions for a specific student
@@ -181,7 +288,7 @@ public class DataManager {
         List<PaymentTransaction> transactions = new ArrayList<>();
         
         try {
-            File logFile = new File(PAYMENT_LOGS_FILE);
+            File logFile = getPaymentLogsFile();
             if (logFile.exists()) {
                 try (BufferedReader reader = new BufferedReader(new FileReader(logFile))) {
                     String line;
@@ -216,7 +323,7 @@ public class DataManager {
         List<StudentInfo> students = new ArrayList<>();
         
         try {
-            File databaseFile = new File(DATABASE_FILE);
+            File databaseFile = getDatabaseFile();
             if (!databaseFile.exists()) {
                 return students;
             }
