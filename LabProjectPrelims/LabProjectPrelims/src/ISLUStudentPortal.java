@@ -5,6 +5,14 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.TreeSet;
+import java.time.LocalTime;
 import java.io.*;
 
 public class ISLUStudentPortal extends JFrame {
@@ -505,38 +513,163 @@ public class ISLUStudentPortal extends JFrame {
         JPanel schedulePanel = new JPanel(new BorderLayout());
         schedulePanel.setBorder(BorderFactory.createTitledBorder("Class Schedule"));
 
-        // Use the subItems from the MenuItem to set the column names
         String[] columnNames = subItems.toArray(new String[0]);
 
-        // Populate with your actual data
-        Object[][] data = {
-                {"7:00-8:00", "", "", "", "", ""},
-                {"8:00-9:00", "NSTP-CWTS 1", "", "NSTP-CWTS 1", "", ""},
-                {"9:00-10:00", "Programming 2", "", "Programming 2", "", "Programming 2"},
-                {"10:00-11:00", "Data Structures", "", "Data Structures", "", "Data Structures"},
-                {"11:00-12:00", "", "", "", "", ""},
-                {"1:00-2:00", "Database Systems", "", "Database Systems", "", ""},
-                {"2:00-3:00", "", "Web Development", "", "Web Development", ""},
-                {"3:00-4:00", "", "", "", "", ""}
-        };
+        // Load dynamic courses for this student
+        List<Course> courses = DataManager.getStudentCourses(studentID);
+
+        // Build time grid from course start/end times (half-hour granularity implied by data)
+        TreeSet<LocalTime> timePoints = new TreeSet<>();
+        for (Course c : courses) {
+            if (c.getStartTime() != null && c.getEndTime() != null) {
+                timePoints.add(c.getStartTime());
+                timePoints.add(c.getEndTime());
+            }
+        }
+        if (timePoints.isEmpty()) {
+            timePoints.add(LocalTime.of(7, 0));
+            timePoints.add(LocalTime.of(18, 0));
+        }
+
+        // Prepare day to column index mapping based on provided headers
+        Map<String, Integer> dayToColumnIndex = new HashMap<>();
+        for (int i = 0; i < columnNames.length; i++) {
+            String header = columnNames[i];
+            if ("Monday".equalsIgnoreCase(header)) dayToColumnIndex.put("M", i);
+            if ("Tuesday".equalsIgnoreCase(header)) dayToColumnIndex.put("T", i);
+            if ("Wednesday".equalsIgnoreCase(header)) dayToColumnIndex.put("W", i);
+            if ("Thursday".equalsIgnoreCase(header)) dayToColumnIndex.put("TH", i);
+            if ("Friday".equalsIgnoreCase(header)) dayToColumnIndex.put("F", i);
+            if ("Saturday".equalsIgnoreCase(header)) dayToColumnIndex.put("S", i);
+        }
+
+        // Build rows for each consecutive time segment
+        List<Object[]> rows = new ArrayList<>();
+        LocalTime prev = null;
+        for (LocalTime point : timePoints) {
+            if (prev != null) {
+                Object[] row = new Object[columnNames.length];
+                row[0] = formatTime(prev) + " - " + formatTime(point);
+                for (int i = 1; i < columnNames.length; i++) row[i] = "";
+
+                // Fill cells with course labels if course overlaps this time block
+                for (Course c : courses) {
+                    if (c.getStartTime() == null || c.getEndTime() == null) continue;
+                    if (!timeRangesOverlap(prev, point, c.getStartTime(), c.getEndTime())) continue;
+                    Set<String> courseDays = parseDays(c.getDays());
+                    for (String code : courseDays) {
+                        Integer col = dayToColumnIndex.get(code);
+                        if (col == null) continue;
+                        String label = c.getCourseNumber() + " (" + c.getRoom() + ")";
+                        if (row[col] == null || ((String) row[col]).isEmpty()) {
+                            row[col] = label;
+                        } else {
+                            row[col] = ((String) row[col]) + " / " + label;
+                        }
+                    }
+                }
+                rows.add(row);
+            }
+            prev = point;
+        }
+
+        Object[][] data = rows.toArray(new Object[0][]);
 
         DefaultTableModel scheduleModel = new DefaultTableModel(data, columnNames) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // Make all cells non-editable
+                return false;
             }
         };
         JTable scheduleTable = new JTable(scheduleModel);
-        scheduleTable.setRowHeight(30);
-        scheduleTable.getTableHeader().setReorderingAllowed(false); // Disable column reordering
-        scheduleTable.setAutoCreateRowSorter(false); // Disable sorting
-        JScrollPane scrollPane = new JScrollPane(scheduleTable);
+        scheduleTable.setRowHeight(28);
+        scheduleTable.getTableHeader().setReorderingAllowed(false);
+        scheduleTable.setAutoCreateRowSorter(false);
+        JScrollPane scheduleScroll = new JScrollPane(scheduleTable);
 
-        schedulePanel.add(scrollPane, BorderLayout.CENTER);
+        schedulePanel.add(scheduleScroll, BorderLayout.CENTER);
 
-        // Return the newly created panel instead of adding it here.
-        // The caller method (e.g., showContent) will add it to the main panel.
+        // Details panel with course list and total units
+        JPanel detailsPanel = new JPanel(new BorderLayout());
+        detailsPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
+
+        JLabel detailsHeader = new JLabel("Subjects and Details");
+        detailsHeader.setFont(new Font("Arial", Font.BOLD, 14));
+        detailsPanel.add(detailsHeader, BorderLayout.NORTH);
+
+        String[] detailsColumns = {"Class Code", "Course Number", "Descriptive Title", "Units", "Days", "Time", "Room"};
+        Object[][] detailsData = new Object[courses.size()][detailsColumns.length];
+        for (int i = 0; i < courses.size(); i++) {
+            Course c = courses.get(i);
+            detailsData[i][0] = c.getClassCode();
+            detailsData[i][1] = c.getCourseNumber();
+            detailsData[i][2] = c.getCourseDescription();
+            detailsData[i][3] = c.getUnits();
+            detailsData[i][4] = c.getDays();
+            detailsData[i][5] = c.getScheduleDisplay();
+            detailsData[i][6] = c.getRoom();
+        }
+        DefaultTableModel detailsModel = new DefaultTableModel(detailsData, detailsColumns) {
+            @Override
+            public boolean isCellEditable(int row, int column) { return false; }
+        };
+        JTable detailsTable = new JTable(detailsModel);
+        detailsTable.setRowHeight(24);
+        detailsTable.getTableHeader().setReorderingAllowed(false);
+        JScrollPane detailsScroll = new JScrollPane(detailsTable);
+        detailsPanel.add(detailsScroll, BorderLayout.CENTER);
+
+        int totalUnits = DataManager.getTotalUnits(studentID);
+        JLabel totalUnitsLabel = new JLabel("Total Units: " + totalUnits);
+        totalUnitsLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        JPanel totalUnitsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        totalUnitsPanel.setBackground(Color.WHITE);
+        totalUnitsPanel.add(totalUnitsLabel);
+        detailsPanel.add(totalUnitsPanel, BorderLayout.SOUTH);
+
+        schedulePanel.add(detailsPanel, BorderLayout.SOUTH);
+
         return schedulePanel;
+    }
+
+    private static boolean timeRangesOverlap(LocalTime aStart, LocalTime aEnd, LocalTime bStart, LocalTime bEnd) {
+        return aStart.isBefore(bEnd) && bStart.isBefore(aEnd);
+    }
+
+    private static String formatTime(LocalTime time) {
+        int hour = time.getHour();
+        int minute = time.getMinute();
+        String ampm = hour < 12 ? "AM" : "PM";
+        int hour12 = hour % 12;
+        if (hour12 == 0) hour12 = 12;
+        return hour12 + ":" + String.format("%02d", minute) + " " + ampm;
+    }
+
+    private static Set<String> parseDays(String daysCode) {
+        Set<String> result = new HashSet<>();
+        if (daysCode == null) return result;
+        String s = daysCode.trim().toUpperCase();
+        for (int i = 0; i < s.length(); i++) {
+            char ch = s.charAt(i);
+            if (ch == 'M') {
+                result.add("M");
+            } else if (ch == 'T') {
+                // Lookahead for TH (Thursday)
+                if (i + 1 < s.length() && s.charAt(i + 1) == 'H') {
+                    result.add("TH");
+                    i++; // skip H
+                } else {
+                    result.add("T"); // Tuesday
+                }
+            } else if (ch == 'W') {
+                result.add("W");
+            } else if (ch == 'F') {
+                result.add("F");
+            } else if (ch == 'S') {
+                result.add("S"); // Saturday
+            }
+        }
+        return result;
     }
     // method for attendance Content
     private Component showAttendanceContent(LinkedList<String> subItems) {

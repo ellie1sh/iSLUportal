@@ -14,6 +14,9 @@ public class DataManager {
     private static final String USER_PASSWORD_FILE = "UserPasswordID.txt";
     private static final String PAYMENT_LOGS_FILE = "paymentLogs.txt";
     
+    // In-memory fallback schedule per student (since we don't use a DB here)
+    private static final Map<String, java.util.List<Course>> studentIdToCourses = new HashMap<>();
+    
     /**
      * Resolve a data file by searching from the working directory and then walking up
      * from the compiled classes location. This makes file access robust regardless
@@ -52,6 +55,61 @@ public class DataManager {
 
     public static boolean databaseExists() {
         return getDatabaseFile().exists();
+    }
+    
+    /**
+     * Returns a list of courses for the given student. If none exist yet, seeds
+     * the sample dataset aligned with the user's provided schedule.
+     */
+    public static List<Course> getStudentCourses(String studentID) {
+        if (!studentIdToCourses.containsKey(studentID)) {
+            seedSampleCourses(studentID);
+        }
+        return new ArrayList<>(studentIdToCourses.getOrDefault(studentID, Collections.emptyList()));
+    }
+    
+    /**
+     * Calculates total units for the student's current courses.
+     */
+    public static int getTotalUnits(String studentID) {
+        List<Course> courses = getStudentCourses(studentID);
+        int total = 0;
+        for (Course c : courses) {
+            total += c.getUnits();
+        }
+        return total;
+    }
+    
+    private static void seedSampleCourses(String studentID) {
+        java.time.LocalTime t1330 = java.time.LocalTime.of(13, 30);
+        java.time.LocalTime t1430 = java.time.LocalTime.of(14, 30);
+        java.time.LocalTime t0930 = java.time.LocalTime.of(9, 30);
+        java.time.LocalTime t1030 = java.time.LocalTime.of(10, 30);
+        java.time.LocalTime t1030a = java.time.LocalTime.of(10, 30);
+        java.time.LocalTime t1130 = java.time.LocalTime.of(11, 30);
+        java.time.LocalTime t1430b = java.time.LocalTime.of(14, 30);
+        java.time.LocalTime t1530 = java.time.LocalTime.of(15, 30);
+        java.time.LocalTime t1600 = java.time.LocalTime.of(16, 0);
+        java.time.LocalTime t1730 = java.time.LocalTime.of(17, 30);
+        java.time.LocalTime t0830 = java.time.LocalTime.of(8, 30);
+        java.time.LocalTime t0900 = java.time.LocalTime.of(9, 0);
+        java.time.LocalTime t1100 = java.time.LocalTime.of(11, 0);
+        java.time.LocalTime t1230 = java.time.LocalTime.of(12, 30);
+        java.time.LocalTime t1300 = java.time.LocalTime.of(13, 0);
+        java.time.LocalTime t1530_2h = java.time.LocalTime.of(17, 30);
+        
+        java.util.List<Course> courses = new ArrayList<>();
+        courses.add(new Course("7024", "NSTP-CWTS 1", "FOUNDATIONS OF SERVICE", 3, t1330, t1430, "MWF", "D906"));
+        courses.add(new Course("9454", "GSTS", "SCIENCE, TECHNOLOGY, AND SOCIETY", 3, t0930, t1030, "TTHS", "D504"));
+        courses.add(new Course("9455", "GENVI", "ENVIRONMENTAL SCIENCE", 3, t0930, t1030, "MWF", "D503"));
+        courses.add(new Course("9456", "CFE 103", "CATHOLIC FOUNDATION OF MISSION", 3, t1330, t1430, "TTHS", "D503"));
+        courses.add(new Course("9457", "IT 211", "REQUIREMENTS ANALYSIS AND MODELING", 3, t1030a, t1100, "MWF", "D511"));
+        courses.add(new Course("9458A", "IT 212", "DATA STRUCTURES (LEC)", 2, t1430b, t1530, "TF", "D513"));
+        courses.add(new Course("9458B", "IT 212L", "DATA STRUCTURES (LAB)", 1, t1600, t1730, "TF", "D522"));
+        courses.add(new Course("9459A", "IT 213", "NETWORK FUNDAMENTALS (LEC)", 2, t0830, t0900, "TF", "D513"));
+        courses.add(new Course("9459B", "IT 213L", "NETWORK FUNDAMENTALS (LAB)", 1, t1130, t1300, "TF", "D528"));
+        courses.add(new Course("9547", "FIT OA", "PHYSICAL ACTIVITY TOWARDS HEALTH AND FITNESS (OUTDOOR AND ADVENTURE ACTIVITIES)", 2, t1530, t1730, "TH", "D221"));
+        studentIdToCourses.put(studentID, courses);
     }
     
     /**
