@@ -500,6 +500,9 @@ public class ISLUStudentPortal extends JFrame {
             case "📋 Transcript of Records":
                 contentPanel.add(createTranscriptOfRecordsPanel());
                 break;
+            case "✅ Curriculum Checklist":
+                contentPanel.add(createCurriculumChecklistPanel());
+                break;
             case "ℹ️ Downloadable/ About iSLU":
                 contentPanel.add(createAboutISLUPanel());
                 break;
@@ -1106,6 +1109,9 @@ public class ISLUStudentPortal extends JFrame {
     // TO DO
     private LinkedList<String> createCurriculumChecklistSubList(){
         LinkedList<String> CurriculumChecklistSubList = new LinkedList<>();
+        CurriculumChecklistSubList.add("Course Number");
+        CurriculumChecklistSubList.add("Course Description");
+        CurriculumChecklistSubList.add("Units");
         return CurriculumChecklistSubList;
     }
     // TO DO
@@ -1482,6 +1488,226 @@ public class ISLUStudentPortal extends JFrame {
 
         mainPanel.add(contentPanel, BorderLayout.CENTER);
         return mainPanel;
+    }
+
+    /**
+     * Creates the Curriculum Checklist panel matching the screenshots
+     */
+    private JPanel createCurriculumChecklistPanel() {
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(new Color(240, 240, 240));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Container with border like other sections
+        JPanel container = new JPanel();
+        container.setLayout(new BoxLayout(container, BoxLayout.Y_AXIS));
+        container.setBackground(Color.WHITE);
+        container.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(0, 0, 0, 0)
+        ));
+
+        // Header bar
+        JPanel headerBar = new JPanel(new BorderLayout());
+        headerBar.setBackground(new Color(10, 45, 90));
+        headerBar.setPreferredSize(new Dimension(0, 50));
+        headerBar.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JLabel headerLabel = new JLabel("BACHELOR OF SCIENCE IN INFORMATION TECHNOLOGY FIRST SEMESTER, 2018-2019");
+        headerLabel.setForeground(Color.WHITE);
+        headerLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        headerBar.add(headerLabel, BorderLayout.WEST);
+        container.add(headerBar);
+
+        // Body with grouped tables
+        JPanel body = new JPanel();
+        body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
+        body.setBackground(Color.WHITE);
+        body.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // Add all groups (data mirrors screenshots)
+        addCurriculumGroup(body, "First Year, First Semester", new Object[][]{
+            {true,  "CFE 101", "GOD'S JOURNEY WITH HIS PEOPLE", "3"},
+            {true,  "FIT HW",  "PHYSICAL ACTIVITY TOWARDS HEALTH AND FITNESS (HEALTH AND WELLNESS)", "2"},
+            {true,  "GART",    "ART APPRECIATION", "3"},
+            {true,  "GHIST",   "READINGS IN PHILIPPINE HISTORY", "3"},
+            {true,  "GSELF",   "UNDERSTANDING THE SELF", "3"},
+            {true,  "IT 111",  "INTRODUCTION TO COMPUTING (LEC)", "2"},
+            {true,  "IT 111L", "INTRODUCTION TO COMPUTING (LAB)", "1"},
+            {true,  "IT 112",  "COMPUTER PROGRAMMING 1 (LEC)", "2"},
+            {true,  "IT 112L", "COMPUTER PROGRAMMING 1 (LAB)", "1"},
+            {true,  "IT 113",  "DISCRETE MATHEMATICS", "3"}
+        });
+
+        addCurriculumGroup(body, "First Year, Second Semester", new Object[][]{
+            {true,  "CFE 102",  "CHRISTIAN MORALITY IN OUR TIMES", "3"},
+            {true,  "FIT CS",   "PHYSICAL ACTIVITY TOWARDS HEALTH AND FITNESS (COMBATIVE SPORTS)", "2"},
+            {true,  "GCWORLD",  "THE CONTEMPORARY WORLD", "3"},
+            {true,  "GMATH",    "MATHEMATICS IN THE MODERN WORLD", "3"},
+            {true,  "GPCOM",    "PURPOSIVE COMMUNICATION", "3"},
+            {true,  "IT 121",   "INFORMATION SYSTEM FUNDAMENTALS", "3"},
+            {true,  "IT 122",   "COMPUTER PROGRAMMING 2", "2"},
+            {true,  "IT 122L",  "COMPUTER PROGRAMMING 2 (LAB)", "1"},
+            {true,  "IT 123",   "PLATFORM TECHNOLOGIES", "2"},
+            {true,  "IT 123L",  "PLATFORM TECHNOLOGIES (LAB)", "1"}
+        });
+
+        addCurriculumGroup(body, "First Year, Short Term", new Object[][]{
+            {true,  "GRIZAL",   "THE LIFE AND WORKS OF RIZAL", "3"},
+            {true,  "IT 131",   "COMPUTER ARCHITECTURE", "2"},
+            {true,  "IT 131L",  "COMPUTER ARCHITECTURE (LAB)", "1"}
+        });
+
+        addCurriculumGroup(body, "Second Year, First Semester", new Object[][]{
+            {true,  "CFE 103",  "CATHOLIC FOUNDATION OF MISSION", "3"},
+            {true,  "FIT OA",   "PHYSICAL ACTIVITY TOWARDS HEALTH AND FITNESS (OUTDOOR AND ADVENTURE ACTIVITIES)", "2"},
+            {true,  "GENVI",    "ENVIRONMENTAL SCIENCE", "3"},
+            {true,  "GSTS",     "SCIENCE, TECHNOLOGY, AND SOCIETY", "3"},
+            {true,  "IT 211",   "REQUIREMENTS ANALYSIS AND MODELING", "3"},
+            {true,  "IT 212",   "DATA STRUCTURES (LEC)", "2"},
+            {true,  "IT 212L",  "DATA STRUCTURES (LAB)", "1"},
+            {true,  "IT 213",   "NETWORK FUNDAMENTALS (LEC)", "2"},
+            {true,  "IT 213L",  "NETWORK FUNDAMENTALS (LAB)", "1"},
+            {true,  "NSTP-CWTS 1", "FOUNDATIONS OF SERVICE", "3"}
+        });
+
+        addCurriculumGroup(body, "Second Year, Second Semester", new Object[][]{
+            {true,  "CFE 104",  "CICM MISSIONARY IDENTITY", "3"},
+            {true,  "FIT AQ",   "PHYSICAL ACTIVITY TOWARDS HEALTH AND FITNESS (AQUATICS)", "2"},
+            {true,  "GENTREP",  "THE ENTREPRENEURIAL MIND", "3"},
+            {true,  "GRVA",     "READING VISUAL ART", "3"},
+            {true,  "IT 221",   "INFORMATION MANAGEMENT (LEC)", "2"},
+            {true,  "IT 221L",  "INFORMATION MANAGEMENT (LAB)", "1"},
+            {true,  "IT 222",   "INTEGRATIVE TECHNOLOGIES (LEC)", "2"},
+            {true,  "IT 222L",  "INTEGRATIVE TECHNOLOGIES (LAB)", "1"},
+            {true,  "IT 225",   "HUMAN COMPUTER INTERACTION", "3"},
+            {true,  "NSTP-CWTS 2", "SOCIAL AWARENESS AND EMPOWERMENT FOR SERVICE", "3"}
+        });
+
+        addCurriculumGroup(body, "Second Year, Short Term", new Object[][]{
+            {true,  "CS 314",   "SOCIAL AND PERSONAL DEVELOPMENT IN THE ICT WORKPLACE", "3"},
+            {true,  "CS 315",   "TECHNOLOGY-ASSISTED PRESENTATION AND COMMUNICATION", "3"},
+            {true,  "GETHICS",  "ETHICS", "3"}
+        });
+
+        addCurriculumGroup(body, "Third Year, First Semester", new Object[][]{
+            {true,  "CFE 105A", "CICM IN ACTION: JUSTICE, PEACE, INTEGRITY OF CREATION, INDIGENOUS PEOPLES & INTERRELIGIOUS DIALOGUE", "1.5"},
+            {true,  "IT 311",   "APPLICATIONS DEVELOPMENT (LEC)", "2"},
+            {true,  "IT 311L",  "APPLICATIONS DEVELOPMENT (LAB)", "1"},
+            {true,  "IT 312",   "WEB TECHNOLOGIES (LEC)", "2"},
+            {true,  "IT 312L",  "WEB TECHNOLOGIES (LAB)", "1"},
+            {true,  "IT 313",   "SOFTWARE ENGINEERING", "3"},
+            {true,  "IT 314",   "SOCIAL AND PROFESSIONAL ISSUES IN INFORMATION TECHNOLOGY", "3"},
+            {true,  "IT 315",   "TECHNOPRENEURSHIP", "3"},
+            {true,  "ITE 15",   "IT SECURITY MANAGEMENT (Elective)", "3"},
+            {true,  "ITE 23",   "ELECTRONIC COMMERCE (Elective)", "3"},
+            {true,  "ITE 30",   "INFORMATION TECHNOLOGY CERTIFICATION REVIEW (Elective)", "3"}
+        });
+
+        addCurriculumGroup(body, "Third Year, Second Semester", new Object[][]{
+            {true,  "CFE 105B", "CICM IN ACTION: ENVIRONMENTAL PLANNING & MANAGEMENT, AND DISASTER RISK REDUCTION MANAGEMENT", "1.5"},
+            {true,  "IT 321",   "IT PROJECT 1", "3"},
+            {true,  "IT 322",   "DATA ANALYTICS (LEC)", "2"},
+            {true,  "IT 322L",  "DATA ANALYTICS (LAB)", "1"},
+            {true,  "IT 323",   "SYSTEM ADMINISTRATION AND MAINTENANCE (LEC)", "2"},
+            {true,  "IT 323L",  "SYSTEM ADMINISTRATION AND MAINTENANCE (LAB)", "1"},
+            {true,  "IT 324",   "SYSTEM INTEGRATION AND ARCHITECTURE", "3"},
+            {true,  "IT 325",   "FIELD TRIPS AND SEMINARS", "3"},
+            {true,  "ITE 26",   "CURRENT TRENDS 1 (Elective)", "3"},
+            {true,  "ITE 27",   "CURRENT TRENDS 2 (Elective)", "3"},
+            {true,  "ITE 29",   "SPECIAL TOPICS 2 (Elective)", "3"}
+        });
+
+        addCurriculumGroup(body, "Third Year, Short Term", new Object[][]{
+            {true,  "IT 331",   "INFORMATION ASSURANCE AND SECURITY", "3"},
+            {true,  "ITE 17",   "DATA MINING (LEC)", "2"},
+            {true,  "ITE 17L",  "DATA MINING (LAB)", "1"}
+        });
+
+        addCurriculumGroup(body, "Fourth Year, First Semester", new Object[][]{
+            {true,  "CFE 106A", "EMBRACING THE CICM MISSION", "1.5"},
+            {true,  "FOR LANG 1", "FOREIGN LANGUAGE 1", "3"},
+            {true,  "IT 411",   "IT PROJECT 2", "3"},
+            {true,  "IT 412",   "IT RESOURCE MANAGEMENT", "3"},
+            {true,  "ITE 14",   "UX CONCEPTS AND DESIGN (Elective)", "3"},
+            {true,  "ITE 28",   "SPECIAL TOPICS 1 (Elective)", "3"}
+        });
+
+        addCurriculumGroup(body, "Fourth Year, Second Semester", new Object[][]{
+            {true,  "CFE 106B", "EMBRACING THE CICM MISSION", "1.5"},
+            {true,  "IT 421",   "PRACTICUM", "9"}
+        });
+
+        container.add(body);
+
+        JScrollPane scrollPane = new JScrollPane(container);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
+
+        return mainPanel;
+    }
+
+    private void addCurriculumGroup(JPanel parent, String title, Object[][] rows) {
+        // Group title
+        JLabel groupLabel = new JLabel(title);
+        groupLabel.setFont(new Font("Arial", Font.BOLD, 12));
+        groupLabel.setBorder(BorderFactory.createEmptyBorder(8, 10, 4, 10));
+        parent.add(groupLabel);
+
+        // Table
+        String[] columns = {"", "Course Number", "Course Description", "Units"};
+        DefaultTableModel model = new DefaultTableModel(rows, columns) {
+            @Override
+            public Class<?> getColumnClass(int columnIndex) {
+                if (columnIndex == 0) return Boolean.class; // for checkmark renderer
+                return String.class;
+            }
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        JTable table = new JTable(model);
+        table.setRowHeight(24);
+        table.getTableHeader().setReorderingAllowed(false);
+        table.setAutoCreateRowSorter(false);
+        table.setShowGrid(true);
+        table.setGridColor(new Color(220, 220, 220));
+
+        // Custom renderers
+        // Checkbox-like green check cells
+        javax.swing.table.DefaultTableCellRenderer checkRenderer = new javax.swing.table.DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable tbl, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+                JLabel lbl = (JLabel) super.getTableCellRendererComponent(tbl, "", isSelected, hasFocus, row, col);
+                lbl.setHorizontalAlignment(SwingConstants.CENTER);
+                boolean done = Boolean.TRUE.equals(value);
+                lbl.setText(done ? "✅" : "");
+                return lbl;
+            }
+        };
+        table.getColumnModel().getColumn(0).setCellRenderer(checkRenderer);
+        table.getColumnModel().getColumn(0).setMaxWidth(40);
+        table.getColumnModel().getColumn(0).setMinWidth(40);
+
+        // Units column right-aligned
+        javax.swing.table.DefaultTableCellRenderer unitsRenderer = new javax.swing.table.DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable tbl, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+                JLabel lbl = (JLabel) super.getTableCellRendererComponent(tbl, value, isSelected, hasFocus, row, col);
+                lbl.setHorizontalAlignment(SwingConstants.RIGHT);
+                return lbl;
+            }
+        };
+        table.getColumnModel().getColumn(3).setCellRenderer(unitsRenderer);
+        table.getColumnModel().getColumn(3).setMaxWidth(80);
+        table.getColumnModel().getColumn(1).setMaxWidth(160);
+
+        JScrollPane tableScroll = new JScrollPane(table);
+        tableScroll.setBorder(BorderFactory.createEmptyBorder(0, 10, 10, 10));
+        parent.add(tableScroll);
     }
 
     private JPanel createPaymentChannelsPanel() {
