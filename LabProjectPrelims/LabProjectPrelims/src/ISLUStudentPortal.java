@@ -6,6 +6,11 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.LinkedList;
 import java.io.*;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ISLUStudentPortal extends JFrame {
     private JPanel mainPanel;
@@ -505,38 +510,183 @@ public class ISLUStudentPortal extends JFrame {
         JPanel schedulePanel = new JPanel(new BorderLayout());
         schedulePanel.setBorder(BorderFactory.createTitledBorder("Class Schedule"));
 
-        // Use the subItems from the MenuItem to set the column names
+        // Header with student and semester info
+        JPanel header = new JPanel(new BorderLayout());
+        header.setBackground(Color.WHITE);
+        header.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        JLabel left = new JLabel(studentName + " (" + studentID + ")");
+        left.setFont(new Font("Arial", Font.BOLD, 14));
+        JLabel right = new JLabel(semester);
+        right.setFont(new Font("Arial", Font.PLAIN, 12));
+        header.add(left, BorderLayout.WEST);
+        header.add(right, BorderLayout.EAST);
+        schedulePanel.add(header, BorderLayout.NORTH);
+
+        // Build dynamic schedule from provided course list equivalent
+        List<CourseScheduleItem> courses = getSampleCourses();
+        int totalUnits = courses.stream().mapToInt(c -> c.units).sum();
+
+        // Time slots (30-minute increments) based on min/max course times
+        LocalTime minStart = courses.stream().map(c -> c.startTime).min(LocalTime::compareTo).orElse(LocalTime.of(8, 0));
+        LocalTime maxEnd = courses.stream().map(c -> c.endTime).max(LocalTime::compareTo).orElse(LocalTime.of(18, 0));
+        minStart = roundDownToHalfHour(minStart);
+        maxEnd = roundUpToHalfHour(maxEnd);
+
+        // Column names from subItems
         String[] columnNames = subItems.toArray(new String[0]);
 
-        // Populate with your actual data
-        Object[][] data = {
-                {"7:00-8:00", "", "", "", "", ""},
-                {"8:00-9:00", "NSTP-CWTS 1", "", "NSTP-CWTS 1", "", ""},
-                {"9:00-10:00", "Programming 2", "", "Programming 2", "", "Programming 2"},
-                {"10:00-11:00", "Data Structures", "", "Data Structures", "", "Data Structures"},
-                {"11:00-12:00", "", "", "", "", ""},
-                {"1:00-2:00", "Database Systems", "", "Database Systems", "", ""},
-                {"2:00-3:00", "", "Web Development", "", "Web Development", ""},
-                {"3:00-4:00", "", "", "", "", ""}
-        };
+        // Build data rows
+        List<Object[]> rows = new ArrayList<>();
+        for (LocalTime slot = minStart; slot.isBefore(maxEnd); slot = slot.plusMinutes(30)) {
+            LocalTime next = slot.plusMinutes(30);
+            Object[] row = new Object[columnNames.length];
+            row[0] = formatTimeRange(slot, next);
+            row[1] = courseLabelAtTime(courses, slot, "M");
+            row[2] = courseLabelAtTime(courses, slot, "T");
+            row[3] = courseLabelAtTime(courses, slot, "W");
+            row[4] = courseLabelAtTime(courses, slot, "TH");
+            row[5] = courseLabelAtTime(courses, slot, "F");
+            rows.add(row);
+        }
 
-        DefaultTableModel scheduleModel = new DefaultTableModel(data, columnNames) {
+        DefaultTableModel scheduleModel = new DefaultTableModel(rows.toArray(new Object[0][]), columnNames) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // Make all cells non-editable
+                return false;
             }
         };
         JTable scheduleTable = new JTable(scheduleModel);
-        scheduleTable.setRowHeight(30);
-        scheduleTable.getTableHeader().setReorderingAllowed(false); // Disable column reordering
-        scheduleTable.setAutoCreateRowSorter(false); // Disable sorting
+        scheduleTable.setRowHeight(28);
+        scheduleTable.getTableHeader().setReorderingAllowed(false);
+        scheduleTable.setAutoCreateRowSorter(false);
         JScrollPane scrollPane = new JScrollPane(scheduleTable);
-
         schedulePanel.add(scrollPane, BorderLayout.CENTER);
 
-        // Return the newly created panel instead of adding it here.
-        // The caller method (e.g., showContent) will add it to the main panel.
+        // Footer with total units
+        JLabel footer = new JLabel("Total Units: " + totalUnits);
+        footer.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
+        schedulePanel.add(footer, BorderLayout.SOUTH);
+
         return schedulePanel;
+    }
+
+    private String courseLabelAtTime(List<CourseScheduleItem> courses, LocalTime slot, String day) {
+        for (CourseScheduleItem c : courses) {
+            if (c.occursOn(day) && !slot.isBefore(c.startTime) && slot.isBefore(c.endTime)) {
+                return c.courseNumber + " (" + c.room + ")";
+            }
+        }
+        return "";
+    }
+
+    private static LocalTime roundDownToHalfHour(LocalTime time) {
+        int minute = time.getMinute();
+        return time.withMinute(minute < 30 ? 0 : 30).withSecond(0).withNano(0);
+    }
+
+    private static LocalTime roundUpToHalfHour(LocalTime time) {
+        int minute = time.getMinute();
+        if (minute == 0 || minute == 30) {
+            return time.withSecond(0).withNano(0);
+        }
+        LocalTime base = time.withSecond(0).withNano(0);
+        return minute < 30 ? base.withMinute(30) : base.plusHours(1).withMinute(0);
+    }
+
+    private static String formatTimeRange(LocalTime start, LocalTime end) {
+        return formatTime(start) + "-" + formatTime(end);
+    }
+
+    private static String formatTime(LocalTime t) {
+        int hour = t.getHour();
+        int minute = t.getMinute();
+        String ampm = hour < 12 ? "AM" : "PM";
+        int displayHour = hour % 12;
+        if (displayHour == 0) displayHour = 12;
+        return String.format("%d:%02d %s", displayHour, minute, ampm);
+    }
+
+    // Lightweight course model aligned with provided fields
+    private static class CourseScheduleItem {
+        final String classCode;
+        final String courseNumber;
+        final String courseDescription;
+        final int units;
+        final LocalTime startTime;
+        final LocalTime endTime;
+        final String days;
+        final String room;
+        final Set<String> daySet;
+
+        CourseScheduleItem(String classCode, String courseNumber, String courseDescription,
+                            int units, LocalTime startTime, LocalTime endTime, String days, String room) {
+            this.classCode = classCode;
+            this.courseNumber = courseNumber;
+            this.courseDescription = courseDescription;
+            this.units = units;
+            this.startTime = startTime;
+            this.endTime = endTime;
+            this.days = days;
+            this.room = room;
+            this.daySet = parseDays(days);
+        }
+
+        boolean occursOn(String day) {
+            return daySet.contains(day);
+        }
+
+        private static Set<String> parseDays(String s) {
+            Set<String> set = new HashSet<>();
+            if (s == null) return set;
+            String str = s.trim().toUpperCase();
+            // Handle common multi-letter tokens first
+            if (str.contains("TH")) {
+                set.add("TH");
+                str = str.replace("TH", "");
+            }
+            for (int i = 0; i < str.length(); i++) {
+                char ch = str.charAt(i);
+                switch (ch) {
+                    case 'M': set.add("M"); break;
+                    case 'T': set.add("T"); break;
+                    case 'W': set.add("W"); break;
+                    case 'F': set.add("F"); break;
+                    case 'S': /* ignore Saturday for 5-day grid */ break;
+                    default: break;
+                }
+            }
+            return set;
+        }
+    }
+
+    private List<CourseScheduleItem> sampleCourses;
+
+    private List<CourseScheduleItem> getSampleCourses() {
+        if (sampleCourses == null) {
+            sampleCourses = new ArrayList<>();
+            // Sample data adapted from provided list
+            sampleCourses.add(new CourseScheduleItem("7024", "NSTP-CWTS 1", "FOUNDATIONS OF SERVICE", 3,
+                    LocalTime.of(13, 30), LocalTime.of(14, 30), "MWF", "D906"));
+            sampleCourses.add(new CourseScheduleItem("9454", "GSTS", "SCIENCE, TECHNOLOGY, AND SOCIETY", 3,
+                    LocalTime.of(9, 30), LocalTime.of(10, 30), "TTHS", "D504"));
+            sampleCourses.add(new CourseScheduleItem("9455", "GENVI", "ENVIRONMENTAL SCIENCE", 3,
+                    LocalTime.of(9, 30), LocalTime.of(10, 30), "MWF", "D503"));
+            sampleCourses.add(new CourseScheduleItem("9456", "CFE 103", "CATHOLIC FOUNDATION OF MISSION", 3,
+                    LocalTime.of(13, 30), LocalTime.of(14, 30), "TTHS", "D503"));
+            sampleCourses.add(new CourseScheduleItem("9457", "IT 211", "REQUIREMENTS ANALYSIS AND MODELING", 3,
+                    LocalTime.of(10, 30), LocalTime.of(11, 30), "MWF", "D511"));
+            sampleCourses.add(new CourseScheduleItem("9458A", "IT 212", "DATA STRUCTURES (LEC)", 2,
+                    LocalTime.of(14, 30), LocalTime.of(15, 30), "TF", "D513"));
+            sampleCourses.add(new CourseScheduleItem("9458B", "IT 212L", "DATA STRUCTURES (LAB)", 1,
+                    LocalTime.of(16, 0), LocalTime.of(17, 30), "TF", "D522"));
+            sampleCourses.add(new CourseScheduleItem("9459A", "IT 213", "NETWORK FUNDAMENTALS (LEC)", 2,
+                    LocalTime.of(8, 30), LocalTime.of(9, 30), "TF", "D513"));
+            sampleCourses.add(new CourseScheduleItem("9459B", "IT 213L", "NETWORK FUNDAMENTALS (LAB)", 1,
+                    LocalTime.of(11, 30), LocalTime.of(13, 0), "TF", "D528"));
+            sampleCourses.add(new CourseScheduleItem("9547", "FIT OA", "PHYSICAL ACTIVITY TOWARDS HEALTH AND FITNESS (OUTDOOR AND ADVENTURE ACTIVITIES)", 2,
+                    LocalTime.of(15, 30), LocalTime.of(17, 30), "TH", "D221"));
+        }
+        return sampleCourses;
     }
     // method for attendance Content
     private Component showAttendanceContent(LinkedList<String> subItems) {
