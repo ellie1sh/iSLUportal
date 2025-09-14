@@ -270,19 +270,16 @@ public class Login extends JFrame {
      * @return true if credentials match, false otherwise
      */
     private boolean authenticateUser(String enteredID, String enteredPassword) {
-        boolean isValid = DataManager.authenticateUser(enteredID, enteredPassword);
-        
-        if (!isValid) {
-            // Check if database file exists
-            File databaseFile = new File("Database.txt");
-            if (!databaseFile.exists()) {
-                JOptionPane.showMessageDialog(this, 
-                    "Database not found. Please contact administrator.", 
-                    "Database Error", 
-                    JOptionPane.ERROR_MESSAGE);
-            }
+        // Check database availability first for clearer error messaging
+        if (!DataManager.databaseExists()) {
+            JOptionPane.showMessageDialog(this,
+                "Database not found. Please contact administrator.",
+                "Database Error",
+                JOptionPane.ERROR_MESSAGE);
+            return false;
         }
-        
+
+        boolean isValid = DataManager.authenticateUser(enteredID, enteredPassword);
         return isValid;
     }
 
