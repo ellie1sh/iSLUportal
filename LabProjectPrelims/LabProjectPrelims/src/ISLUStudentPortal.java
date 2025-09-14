@@ -11,6 +11,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.HashSet;
 import java.util.Set;
+import entity.Course;
+import entity.Student;
+import entity.Enrollment;
+import entity.StudentService;
 
 public class ISLUStudentPortal extends JFrame {
     private JPanel mainPanel;
@@ -496,6 +500,9 @@ public class ISLUStudentPortal extends JFrame {
                 break;
             case "📋 Transcript of Records":
                 contentPanel.add(createTranscriptOfRecordsPanel());
+                break;
+            case "ℹ️ Downloadable/ About iSLU":
+                contentPanel.add(createDownloadablesContent());
                 break;
             default:
                 // Fallback for any other menu item with a sublist
@@ -989,6 +996,318 @@ public class ISLUStudentPortal extends JFrame {
             ((JComboBox<String>) component).setSelectedItem(newValue);
         }
     }
+
+    /**
+     * Creates the Downloadables/About iSLU content panel with course information
+     */
+    private JPanel createDownloadablesContent() {
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(new Color(240, 240, 240));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Create tabbed pane for different sections
+        JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane.setFont(new Font("Arial", Font.BOLD, 12));
+
+        // Course Information Tab
+        JPanel courseInfoPanel = createCourseInformationPanel();
+        tabbedPane.addTab("📚 Course Information", courseInfoPanel);
+
+        // Student Data Tab
+        JPanel studentDataPanel = createStudentDataPanel();
+        tabbedPane.addTab("👤 Student Data", studentDataPanel);
+
+        // About iSLU Tab
+        JPanel aboutPanel = createAboutISLUPanel();
+        tabbedPane.addTab("ℹ️ About iSLU", aboutPanel);
+
+        // System Information Tab
+        JPanel systemInfoPanel = createSystemInformationPanel();
+        tabbedPane.addTab("⚙️ System Info", systemInfoPanel);
+
+        mainPanel.add(tabbedPane, BorderLayout.CENTER);
+        return mainPanel;
+    }
+
+    /**
+     * Creates the Course Information panel showing all enrolled courses
+     */
+    private JPanel createCourseInformationPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Header
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(new Color(10, 45, 90));
+        headerPanel.setPreferredSize(new Dimension(0, 50));
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        
+        JLabel headerLabel = new JLabel("📚 Course Information - " + semester);
+        headerLabel.setForeground(Color.WHITE);
+        headerLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        headerPanel.add(headerLabel, BorderLayout.WEST);
+        
+        panel.add(headerPanel, BorderLayout.NORTH);
+
+        // Get course data from StudentService
+        StudentService studentService = StudentService.getInstance();
+        Object[][] courseData = studentService.getCourseTableData(studentID);
+        String[] courseColumnNames = {
+            "Class Code", "Course Number", "Course Description", 
+            "Units", "Schedule", "Days", "Room"
+        };
+
+        DefaultTableModel courseModel = new DefaultTableModel(courseData, courseColumnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        JTable courseTable = new JTable(courseModel);
+        courseTable.setRowHeight(30);
+        courseTable.getTableHeader().setReorderingAllowed(false);
+        courseTable.setAutoCreateRowSorter(false);
+        courseTable.setShowGrid(true);
+        courseTable.setGridColor(new Color(200, 200, 200));
+        courseTable.setFont(new Font("Arial", Font.PLAIN, 12));
+        courseTable.getTableHeader().setBackground(new Color(240, 240, 240));
+        courseTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 12));
+
+        JScrollPane courseScrollPane = new JScrollPane(courseTable);
+        panel.add(courseScrollPane, BorderLayout.CENTER);
+
+        // Footer with total units
+        JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        footerPanel.setBackground(Color.WHITE);
+        footerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        
+        int totalUnits = studentService.getTotalUnits(studentID);
+        JLabel totalUnitsLabel = new JLabel("Total Units: " + totalUnits);
+        totalUnitsLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        totalUnitsLabel.setForeground(new Color(10, 45, 90));
+        footerPanel.add(totalUnitsLabel);
+        
+        panel.add(footerPanel, BorderLayout.SOUTH);
+
+        return panel;
+    }
+
+    /**
+     * Creates the Student Data panel showing enrollment information
+     */
+    private JPanel createStudentDataPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Header
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(new Color(10, 45, 90));
+        headerPanel.setPreferredSize(new Dimension(0, 50));
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        
+        JLabel headerLabel = new JLabel("👤 Student Enrollment Data");
+        headerLabel.setForeground(Color.WHITE);
+        headerLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        headerPanel.add(headerLabel, BorderLayout.WEST);
+        
+        panel.add(headerPanel, BorderLayout.NORTH);
+
+        // Student info section
+        JPanel studentInfoSection = new JPanel();
+        studentInfoSection.setLayout(new BoxLayout(studentInfoSection, BoxLayout.Y_AXIS));
+        studentInfoSection.setBackground(Color.WHITE);
+        studentInfoSection.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        StudentService studentService = StudentService.getInstance();
+        java.util.Optional<Student> studentOpt = studentService.getStudentById(studentID);
+        
+        if (studentOpt.isPresent()) {
+            Student student = studentOpt.get();
+            
+            JLabel studentIdLabel = new JLabel("Student ID: " + student.getStudentId());
+            studentIdLabel.setFont(new Font("Arial", Font.BOLD, 14));
+            studentInfoSection.add(studentIdLabel);
+            studentInfoSection.add(Box.createVerticalStrut(5));
+            
+            JLabel studentNameLabel = new JLabel("Name: " + student.getFullName());
+            studentNameLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+            studentInfoSection.add(studentNameLabel);
+            studentInfoSection.add(Box.createVerticalStrut(5));
+            
+            JLabel blockLabel = new JLabel("Block: " + student.getBlock());
+            blockLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+            studentInfoSection.add(blockLabel);
+            studentInfoSection.add(Box.createVerticalStrut(5));
+            
+            JLabel academicYearLabel = new JLabel("Academic Year: " + student.getAcademicYear());
+            academicYearLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+            studentInfoSection.add(academicYearLabel);
+            studentInfoSection.add(Box.createVerticalStrut(5));
+            
+            JLabel semesterLabel = new JLabel("Semester: " + student.getSemester());
+            semesterLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+            studentInfoSection.add(semesterLabel);
+            studentInfoSection.add(Box.createVerticalStrut(5));
+            
+            JLabel totalUnitsLabel = new JLabel("Total Units: " + student.getTotalUnits());
+            totalUnitsLabel.setFont(new Font("Arial", Font.BOLD, 14));
+            totalUnitsLabel.setForeground(new Color(10, 45, 90));
+            studentInfoSection.add(totalUnitsLabel);
+        }
+
+        panel.add(studentInfoSection, BorderLayout.CENTER);
+
+        return panel;
+    }
+
+    /**
+     * Creates the About iSLU panel with university information
+     */
+    private JPanel createAboutISLUPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Header
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(new Color(10, 45, 90));
+        headerPanel.setPreferredSize(new Dimension(0, 50));
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        
+        JLabel headerLabel = new JLabel("ℹ️ About Saint Louis University");
+        headerLabel.setForeground(Color.WHITE);
+        headerLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        headerPanel.add(headerLabel, BorderLayout.WEST);
+        
+        panel.add(headerPanel, BorderLayout.NORTH);
+
+        // Content
+        JTextArea aboutContent = new JTextArea();
+        aboutContent.setEditable(false);
+        aboutContent.setFont(new Font("Arial", Font.PLAIN, 14));
+        aboutContent.setLineWrap(true);
+        aboutContent.setWrapStyleWord(true);
+        aboutContent.setBackground(Color.WHITE);
+        aboutContent.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        String aboutText = "SAINT LOUIS UNIVERSITY\n\n" +
+                "Saint Louis University (SLU) is a private Catholic research university located in Baguio, Philippines. " +
+                "Founded in 1911 by the Belgian missionaries, it is one of the oldest and most prestigious universities in the Philippines.\n\n" +
+                "MISSION\n" +
+                "Saint Louis University forms competent and committed professionals through excellent and relevant education, " +
+                "innovative research and responsive community service in the light of the Catholic faith.\n\n" +
+                "VISION\n" +
+                "Saint Louis University is a leading Catholic University in Asia committed to academic excellence in the " +
+                "formation of competent and socially responsible graduates and in the discovery and application of knowledge " +
+                "for human development and the sustainable transformation of society.\n\n" +
+                "CORE VALUES\n" +
+                "• Excellence in all endeavors\n" +
+                "• Integrity in all actions\n" +
+                "• Service to others\n" +
+                "• Innovation and creativity\n" +
+                "• Respect for diversity\n" +
+                "• Environmental stewardship\n\n" +
+                "ACADEMIC PROGRAMS\n" +
+                "SLU offers a wide range of undergraduate and graduate programs across various disciplines including:\n" +
+                "• Information Technology\n" +
+                "• Engineering\n" +
+                "• Business Administration\n" +
+                "• Education\n" +
+                "• Medicine\n" +
+                "• Law\n" +
+                "• Liberal Arts\n" +
+                "• And many more...\n\n" +
+                "CAMPUS LIFE\n" +
+                "The university provides a vibrant campus life with modern facilities, student organizations, " +
+                "sports programs, and cultural activities that enhance the overall educational experience.";
+
+        aboutContent.setText(aboutText);
+        aboutContent.setCaretPosition(0);
+
+        JScrollPane scrollPane = new JScrollPane(aboutContent);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        return panel;
+    }
+
+    /**
+     * Creates the System Information panel showing technical details
+     */
+    private JPanel createSystemInformationPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        // Header
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(new Color(10, 45, 90));
+        headerPanel.setPreferredSize(new Dimension(0, 50));
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        
+        JLabel headerLabel = new JLabel("⚙️ System Information");
+        headerLabel.setForeground(Color.WHITE);
+        headerLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        headerPanel.add(headerLabel, BorderLayout.WEST);
+        
+        panel.add(headerPanel, BorderLayout.NORTH);
+
+        // System info content
+        JPanel infoPanel = new JPanel(new GridBagLayout());
+        infoPanel.setBackground(Color.WHITE);
+        infoPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.insets = new Insets(5, 5, 5, 20);
+
+        String[][] systemInfo = {
+            {"Application Name:", "iSLU Student Portal"},
+            {"Version:", "1.0.0"},
+            {"Build Date:", "September 2025"},
+            {"Technology:", "Java Swing"},
+            {"Database:", "File-based Storage"},
+            {"Student Service:", "Integrated Course Management"},
+            {"Entity Framework:", "Custom Implementation"},
+            {"Data Models:", "Course, Student, Enrollment"},
+            {"Features:", "Schedule, Grades, Payments, Transcripts"},
+            {"Support:", "SLU IT Department"}
+        };
+
+        for (int i = 0; i < systemInfo.length; i++) {
+            gbc.gridx = 0;
+            gbc.gridy = i;
+            gbc.weightx = 0.3;
+            JLabel labelComponent = new JLabel(systemInfo[i][0]);
+            labelComponent.setFont(new Font("Arial", Font.BOLD, 12));
+            infoPanel.add(labelComponent, gbc);
+
+            gbc.gridx = 1;
+            gbc.weightx = 0.7;
+            JLabel valueComponent = new JLabel(systemInfo[i][1]);
+            valueComponent.setFont(new Font("Arial", Font.PLAIN, 12));
+            infoPanel.add(valueComponent, gbc);
+        }
+
+        panel.add(infoPanel, BorderLayout.CENTER);
+
+        // Footer with additional info
+        JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        footerPanel.setBackground(Color.WHITE);
+        footerPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        
+        JLabel footerLabel = new JLabel("© 2025 Saint Louis University. All rights reserved.");
+        footerLabel.setFont(new Font("Arial", Font.ITALIC, 12));
+        footerLabel.setForeground(Color.GRAY);
+        footerPanel.add(footerLabel);
+        
+        panel.add(footerPanel, BorderLayout.SOUTH);
+
+        return panel;
+    }
+
 // Generic Content
 
     private void showGenericContent(String menuItem) {
