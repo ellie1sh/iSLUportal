@@ -479,6 +479,9 @@ public class ISLUStudentPortal extends JFrame {
             case "🏠 Home":
                 setupLayout();
                 break;
+            case "✅ Curriculum Checklist":
+                contentPanel.add(createCurriculumChecklistPanel());
+                break;
             case "📚 Journal/Periodical":
                 contentPanel.add(createJournalPeriodicalPanel());
                 break;
@@ -510,6 +513,142 @@ public class ISLUStudentPortal extends JFrame {
         contentPanel.revalidate();
         contentPanel.repaint();
 
+    }
+    // Curriculum Checklist Panel
+    private JPanel createCurriculumChecklistPanel() {
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(new Color(240, 240, 240));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        JPanel content = new JPanel(new BorderLayout());
+        content.setBackground(Color.WHITE);
+        content.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(0, 0, 0, 0)
+        ));
+
+        // Header similar to reference style
+        JPanel header = new JPanel(new BorderLayout());
+        header.setBackground(new Color(10, 45, 90));
+        header.setPreferredSize(new Dimension(0, 50));
+        header.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JLabel headerLabel = new JLabel("✅ Curriculum Checklist — Bachelor of Science in Information Technology");
+        headerLabel.setForeground(Color.WHITE);
+        headerLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        header.add(headerLabel, BorderLayout.WEST);
+        content.add(header, BorderLayout.NORTH);
+
+        // Build table
+        String[] columnNames = {"", "Course Number", "Course Description", "Units"};
+
+        java.util.Set<Integer> headerRowIndices = new java.util.HashSet<>();
+        Object[][] data = buildCurriculumChecklistData(headerRowIndices);
+
+        DefaultTableModel model = new DefaultTableModel(data, columnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        JTable table = new JTable(model);
+        table.setRowHeight(28);
+        table.getTableHeader().setReorderingAllowed(false);
+        table.setAutoCreateRowSorter(false);
+
+        // Renderer to style header rows and align columns
+        javax.swing.table.DefaultTableCellRenderer renderer = new javax.swing.table.DefaultTableCellRenderer() {
+            @Override
+            public java.awt.Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                boolean isHeaderRow = headerRowIndices.contains(row);
+                if (isHeaderRow) {
+                    setBackground(new Color(245, 245, 245));
+                    setFont(getFont().deriveFont(Font.BOLD));
+                } else {
+                    setBackground(Color.WHITE);
+                    setFont(getFont().deriveFont(Font.PLAIN));
+                }
+                if (column == 0) {
+                    setHorizontalAlignment(SwingConstants.CENTER);
+                } else if (column == 3) {
+                    setHorizontalAlignment(SwingConstants.RIGHT);
+                } else {
+                    setHorizontalAlignment(SwingConstants.LEFT);
+                }
+                return this;
+            }
+        };
+
+        for (int i = 0; i < table.getColumnModel().getColumnCount(); i++) {
+            table.getColumnModel().getColumn(i).setCellRenderer(renderer);
+        }
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        content.add(scrollPane, BorderLayout.CENTER);
+
+        mainPanel.add(content, BorderLayout.CENTER);
+        return mainPanel;
+    }
+
+    private Object[][] buildCurriculumChecklistData(java.util.Set<Integer> headerRowIndices) {
+        java.util.List<Object[]> rows = new java.util.ArrayList<>();
+
+        // Helper to add a section header
+        java.util.function.Consumer<String> addHeader = (title) -> {
+            rows.add(new Object[]{"", title, "", ""});
+            headerRowIndices.add(rows.size() - 1);
+        };
+
+        // Helper to add a course row with a check icon
+        java.util.function.BiConsumer<String, Object[]> addCourse = (code, rest) -> {
+            rows.add(new Object[]{"✅", code, rest[0], rest[1]});
+        };
+
+        // First Year, First Semester
+        addHeader.accept("First Year, First Semester");
+        addCourse.accept("CFE 101", new Object[]{"GOD'S JOURNEY WITH HIS PEOPLE", 3});
+        addCourse.accept("FIT HW", new Object[]{"PHYSICAL ACTIVITY TOWARDS HEALTH AND FITNESS (HEALTH AND WELLNESS)", 2});
+        addCourse.accept("GART", new Object[]{"ART APPRECIATION", 3});
+        addCourse.accept("GHIST", new Object[]{"READINGS IN PHILIPPINE HISTORY", 3});
+        addCourse.accept("GSELF", new Object[]{"UNDERSTANDING THE SELF", 3});
+        addCourse.accept("IT 111", new Object[]{"INTRODUCTION TO COMPUTING (LEC)", 2});
+        addCourse.accept("IT 111L", new Object[]{"INTRODUCTION TO COMPUTING (LAB)", 1});
+        addCourse.accept("IT 112", new Object[]{"COMPUTER PROGRAMMING 1 (LEC)", 2});
+        addCourse.accept("IT 112L", new Object[]{"COMPUTER PROGRAMMING 1 (LAB)", 1});
+        addCourse.accept("IT 113", new Object[]{"DISCRETE MATHEMATICS", 3});
+
+        // First Year, Second Semester
+        addHeader.accept("First Year, Second Semester");
+        addCourse.accept("CFE 102", new Object[]{"CHRISTIAN MORALITY IN OUR TIMES", 3});
+        addCourse.accept("FIT CS", new Object[]{"PHYSICAL ACTIVITY TOWARDS HEALTH AND FITNESS (COMBATIVE SPORTS)", 2});
+        addCourse.accept("GCWORLD", new Object[]{"THE CONTEMPORARY WORLD", 3});
+        addCourse.accept("GMATH", new Object[]{"MATHEMATICS IN THE MODERN WORLD", 3});
+        addCourse.accept("GPCOM", new Object[]{"PURPOSIVE COMMUNICATION", 3});
+        addCourse.accept("IT 121", new Object[]{"INFORMATION SYSTEM FUNDAMENTALS", 3});
+        addCourse.accept("IT 122", new Object[]{"COMPUTER PROGRAMMING 2", 2});
+        addCourse.accept("IT 122L", new Object[]{"COMPUTER PROGRAMMING 2 (LAB)", 1});
+        addCourse.accept("IT 123", new Object[]{"PLATFORM TECHNOLOGIES", 2});
+        addCourse.accept("IT 123L", new Object[]{"PLATFORM TECHNOLOGIES (LAB)", 1});
+
+        // First Year, Short Term
+        addHeader.accept("First Year, Short Term");
+        addCourse.accept("GRIZAL", new Object[]{"THE LIFE AND WORKS OF RIZAL", 3});
+        addCourse.accept("IT 131", new Object[]{"COMPUTER ARCHITECTURE", 2});
+        addCourse.accept("IT 131L", new Object[]{"COMPUTER ARCHITECTURE (LAB)", 1});
+
+        // Second Year, First Semester
+        addHeader.accept("Second Year, First Semester");
+        addCourse.accept("CFE 103", new Object[]{"CATHOLIC FOUNDATION OF MISSION", 3});
+        addCourse.accept("FIT OA", new Object[]{"PHYSICAL ACTIVITY TOWARDS HEALTH AND FITNESS (OUTDOOR AND ADVENTURE ACTIVITIES)", 2});
+        addCourse.accept("GENVI", new Object[]{"ENVIRONMENTAL SCIENCE", 3});
+        addCourse.accept("GSTS", new Object[]{"SCIENCE, TECHNOLOGY, AND SOCIETY", 3});
+        addCourse.accept("IT 211", new Object[]{"REQUIREMENTS ANALYSIS AND MODELING", 3});
+        addCourse.accept("IT 212", new Object[]{"DATA STRUCTURES (LEC)", 2});
+        addCourse.accept("IT 212L", new Object[]{"DATA STRUCTURES (LAB)", 1});
+
+        return rows.toArray(new Object[0][4]);
     }
     // Journal/Periodical Panel
     private JPanel createJournalPeriodicalPanel() {
