@@ -497,6 +497,9 @@ public class ISLUStudentPortal extends JFrame {
             case "📋 Transcript of Records":
                 contentPanel.add(createTranscriptOfRecordsPanel());
                 break;
+            case "ℹ️ Downloadable/ About iSLU":
+                contentPanel.add(createDownloadablesPanel());
+                break;
             default:
                 // Fallback for any other menu item with a sublist
                 showGenericContent(item.getName());
@@ -504,6 +507,140 @@ public class ISLUStudentPortal extends JFrame {
         contentPanel.revalidate();
         contentPanel.repaint();
 
+    }
+
+    // Downloadables Panel (Schedule export using Course fields/format)
+    private JPanel createDownloadablesPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(Color.GRAY),
+                "ℹ️ Downloadables - Schedule",
+                TitledBorder.LEFT,
+                TitledBorder.TOP,
+                new Font("Arial", Font.BOLD, 14)
+        ));
+        panel.setBackground(Color.WHITE);
+
+        // Header with student info
+        JPanel header = new JPanel(new BorderLayout());
+        header.setBackground(Color.WHITE);
+        header.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        JLabel left = new JLabel(studentName + " (" + studentID + ")");
+        left.setFont(new Font("Arial", Font.BOLD, 14));
+        JLabel right = new JLabel(semester);
+        right.setFont(new Font("Arial", Font.PLAIN, 12));
+        header.add(left, BorderLayout.WEST);
+        header.add(right, BorderLayout.EAST);
+        panel.add(header, BorderLayout.NORTH);
+
+        // Table model based on provided Course fields
+        String[] columnNames = {
+            "Class Code", "Course Number", "Course Description", "Units", "Schedule", "Days", "Room"
+        };
+
+        List<CourseScheduleItem> courses = getSampleCourses();
+        Object[][] data = new Object[courses.size()][columnNames.length];
+        for (int i = 0; i < courses.size(); i++) {
+            CourseScheduleItem c = courses.get(i);
+            data[i][0] = c.classCode;
+            data[i][1] = c.courseNumber;
+            data[i][2] = c.courseDescription;
+            data[i][3] = c.units;
+            data[i][4] = getScheduleDisplay(c.startTime, c.endTime); // HHmm - HHmm AM/PM (from start)
+            data[i][5] = c.days;
+            data[i][6] = c.room;
+        }
+
+        DefaultTableModel model = new DefaultTableModel(data, columnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) { return false; }
+        };
+        JTable table = new JTable(model);
+        table.setRowHeight(28);
+        table.getTableHeader().setReorderingAllowed(false);
+        table.setAutoCreateRowSorter(false);
+        JScrollPane scrollPane = new JScrollPane(table);
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        // Footer with actions and total units
+        JPanel footer = new JPanel(new BorderLayout());
+        footer.setBackground(Color.WHITE);
+        footer.setBorder(BorderFactory.createEmptyBorder(8, 10, 8, 10));
+
+        int totalUnits = courses.stream().mapToInt(c -> c.units).sum();
+        JLabel unitsLabel = new JLabel("Total Units: " + totalUnits);
+        footer.add(unitsLabel, BorderLayout.WEST);
+
+        JPanel actions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        actions.setBackground(Color.WHITE);
+        JButton exportCsv = new JButton("Export CSV");
+        JButton exportTxt = new JButton("Export TXT");
+        exportCsv.addActionListener(e -> exportScheduleToCSV(courses));
+        exportTxt.addActionListener(e -> exportScheduleToTXT(courses));
+        actions.add(exportCsv);
+        actions.add(exportTxt);
+        footer.add(actions, BorderLayout.EAST);
+
+        panel.add(footer, BorderLayout.SOUTH);
+        return panel;
+    }
+
+    private static String getScheduleDisplay(LocalTime startTime, LocalTime endTime) {
+        return String.format("%02d%02d - %02d%02d %s",
+                startTime.getHour(), startTime.getMinute(),
+                endTime.getHour(), endTime.getMinute(),
+                startTime.getHour() < 12 ? "AM" : "PM");
+    }
+
+    private void exportScheduleToCSV(List<CourseScheduleItem> courses) {
+        File dir = new File("Downloadables");
+        if (!dir.exists()) { dir.mkdirs(); }
+        File out = new File(dir, "Schedule_" + studentID + ".csv");
+        try (PrintWriter pw = new PrintWriter(new FileWriter(out))) {
+            pw.println("Student ID," + studentID);
+            pw.println("Student Name," + studentName);
+            pw.println("Semester," + semester);
+            pw.println();
+            pw.println("Class Code,Course Number,Course Description,Units,Schedule,Days,Room");
+            for (CourseScheduleItem c : courses) {
+                String schedule = getScheduleDisplay(c.startTime, c.endTime);
+                // Escape commas in description by wrapping in quotes if needed
+                String description = c.courseDescription.contains(",") ? '"' + c.courseDescription.replace("\"", "\"\"") + '"' : c.courseDescription;
+                pw.printf("%s,%s,%s,%d,%s,%s,%s%n",
+                        c.classCode,
+                        c.courseNumber,
+                        description,
+                        c.units,
+                        schedule,
+                        c.days,
+                        c.room);
+            }
+            JOptionPane.showMessageDialog(this, "CSV exported to: " + out.getAbsolutePath(), "Export Successful", JOptionPane.INFORMATION_MESSAGE);
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, "Failed to export CSV: " + ex.getMessage(), "Export Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void exportScheduleToTXT(List<CourseScheduleItem> courses) {
+        File dir = new File("Downloadables");
+        if (!dir.exists()) { dir.mkdirs(); }
+        File out = new File(dir, "Schedule_" + studentID + ".txt");
+        try (PrintWriter pw = new PrintWriter(new FileWriter(out))) {
+            pw.println("iSLU Student Portal - Schedule Download");
+            pw.println("Student: " + studentName + " (" + studentID + ")");
+            pw.println("Semester: " + semester);
+            pw.println("====================================================");
+            for (CourseScheduleItem c : courses) {
+                pw.println(c.classCode + " | " + c.courseNumber + " | " + c.courseDescription);
+                pw.println("Units: " + c.units + " | Schedule: " + getScheduleDisplay(c.startTime, c.endTime) + " | Days: " + c.days + " | Room: " + c.room);
+                pw.println("----------------------------------------------------");
+            }
+            int totalUnits = courses.stream().mapToInt(x -> x.units).sum();
+            pw.println("Total Units: " + totalUnits);
+            JOptionPane.showMessageDialog(this, "TXT exported to: " + out.getAbsolutePath(), "Export Successful", JOptionPane.INFORMATION_MESSAGE);
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, "Failed to export TXT: " + ex.getMessage(), "Export Error", JOptionPane.ERROR_MESSAGE);
+        }
     }
     //method for Schedule Content
     private JPanel showScheduleContent(LinkedList<String> subItems) {
