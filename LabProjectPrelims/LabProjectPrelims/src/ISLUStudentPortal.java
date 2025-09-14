@@ -500,8 +500,19 @@ public class ISLUStudentPortal extends JFrame {
         contentPanel.repaint();
 
     }
-    //method for Schedule Content
+    //method for Schedule Content - Enhanced with Spring Boot integration
     private JPanel showScheduleContent(LinkedList<String> subItems) {
+        // Try to use enhanced schedule panel with Spring Boot integration
+        try {
+            return SpringScheduleIntegration.createEnhancedSchedulePanel(studentID);
+        } catch (Exception e) {
+            System.out.println("Enhanced schedule not available, using fallback: " + e.getMessage());
+            // Fallback to original implementation
+            return createFallbackSchedulePanel(subItems);
+        }
+    }
+    
+    private JPanel createFallbackSchedulePanel(LinkedList<String> subItems) {
         JPanel schedulePanel = new JPanel(new BorderLayout());
         schedulePanel.setBorder(BorderFactory.createTitledBorder("Class Schedule"));
 
