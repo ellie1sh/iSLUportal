@@ -218,6 +218,225 @@ public class ISLUStudentPortal extends JFrame {
         return footerWithSeparator;
     }
 
+    // Downloadables / About iSLU combined view
+    private JPanel createDownloadablesAboutPanel() {
+        JPanel panel = new JPanel(new GridLayout(1, 2, 10, 10));
+        panel.setBackground(Color.WHITE);
+
+        panel.add(buildDownloadablesPanel());
+        panel.add(buildAboutISLUPanel());
+
+        return panel;
+    }
+
+    private JPanel buildDownloadablesPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(Color.GRAY),
+                "Downloadables",
+                TitledBorder.LEFT,
+                TitledBorder.TOP,
+                new Font("Arial", Font.BOLD, 14)
+        ));
+
+        JPanel content = new JPanel();
+        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+        content.setBackground(Color.WHITE);
+        content.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        // Helper to add a section header
+        java.util.function.Consumer<String> addSectionHeader = title -> {
+            JLabel header = new JLabel(title);
+            header.setFont(new Font("Arial", Font.BOLD, 13));
+            header.setBorder(BorderFactory.createEmptyBorder(8, 0, 4, 0));
+            content.add(header);
+        };
+
+        // Helper to add a bullet item with a red [download] action
+        java.util.function.BiConsumer<String, String> addItem = (label, id) -> {
+            JPanel row = new JPanel(new BorderLayout());
+            row.setBackground(Color.WHITE);
+            row.setBorder(BorderFactory.createEmptyBorder(2, 8, 2, 0));
+
+            JLabel text = new JLabel("• " + label);
+            text.setFont(new Font("Arial", Font.PLAIN, 12));
+            row.add(text, BorderLayout.WEST);
+
+            JButton download = createLinkButton("[download]");
+            download.addActionListener(e -> JOptionPane.showMessageDialog(this,
+                    "Started download: " + label,
+                    "Download",
+                    JOptionPane.INFORMATION_MESSAGE));
+            row.add(download, BorderLayout.EAST);
+
+            content.add(row);
+        };
+
+        // Sections and items (representative list matching screenshot categories)
+        addSectionHeader.accept("General");
+        addItem.accept("Student Handbook", "handbook");
+        addItem.accept("Safety Orientation Manual", "safety");
+        addItem.accept("Ordinance 021-2018 - Harassment", "ordinance021");
+        addItem.accept("GSuite for Education", "gsuite");
+        addItem.accept("The Mission and Identity Cluster", "mission");
+        addItem.accept("Official List of Student Organizations", "orgs");
+        addItem.accept("University Libraries", "libraries");
+        addItem.accept("OSA Student Services Orientation", "osa");
+        addItem.accept("KASAMA SSC Orientation", "kasama");
+        addItem.accept("Feeling at Home in SLU", "home");
+        addItem.accept("Health and Safety Protocols re COVID 19 Prevention and Control", "covid");
+        addItem.accept("Policies and Guidelines on Student Behavior during Online Correspondence Based Learning", "policies");
+        addItem.accept("SLU Policy on COVID-19 Prevention and Control Measures in the Workplace", "policywork");
+        addItem.accept("SLU Privacy Policy", "privacy");
+        addItem.accept("SLU Quality Policy", "quality");
+        addItem.accept("SLU UNIVERSITY PRAYER", "prayer");
+        addItem.accept("Special Guidelines for Recognition or Renewal of Recognition 2021 to 2022", "recognition");
+        addItem.accept("Baguio City Anti Discrimination Ordinance", "antidiscrim");
+        addItem.accept("IRR of RA 11313 Safe Spaces Act", "irrsafespaces");
+        addItem.accept("Safe Spaces Act 20190474 RA 11313 IRD", "safespaces");
+        addItem.accept("Emails of SLU Student Groups", "emails");
+
+        addSectionHeader.accept("Center for Counseling and Wellness");
+        addItem.accept("Handouts for Parents on their Child/ren's Independent Living in College", "ccw_handouts");
+        addItem.accept("Fresher Career Booklet", "ccw_career_booklet");
+        addItem.accept("Referral Guide Poster", "ccw_referral_poster");
+        addItem.accept("SLUN Brochure", "ccw_brochure");
+        addItem.accept("SLUN Form", "ccw_form");
+        addItem.accept("The Louisian Journal 2023", "ccw_journal");
+        addItem.accept("CCW Referral Form", "ccw_referral_form");
+
+        addSectionHeader.accept("Other Student Services");
+        addItem.accept("MEDICAL CLINIC CONTINUITY PLAN", "med_plan");
+        addItem.accept("Online Schedule of Medical Clinic", "med_sched");
+        addItem.accept("SLU Residence Halls", "residence");
+
+        addSectionHeader.accept("SAMCIS");
+        addItem.accept("SAMCIS Online Helpdesk", "samcis_helpdesk");
+        addItem.accept("SAMCIS Program Offerings Overview", "samcis_overview");
+
+        addSectionHeader.accept("SEA");
+        addItem.accept("SEA Online Helpdesk", "sea_helpdesk");
+        addItem.accept("SEA Program Offerings Overview", "sea_overview");
+
+        addSectionHeader.accept("SONAHBS");
+        addItem.accept("SONAHBS Online Helpdesk", "sonahbs_helpdesk");
+
+        addSectionHeader.accept("SOM");
+        addItem.accept("SOM Online Helpdesk", "som_helpdesk");
+
+        addSectionHeader.accept("STELA");
+        addItem.accept("STELA Online Helpdesk", "stela_helpdesk");
+        addItem.accept("STELA Program Offerings Overview", "stela_overview");
+
+        addSectionHeader.accept("Student Services Orientation");
+        addItem.accept("Guidance Center", "guidance");
+        addItem.accept("Office of Student Affairs", "osa_office");
+        addItem.accept("University Registrar's Office", "registrar");
+        addItem.accept("University Libraries", "libraries_services");
+        addItem.accept("External Relations, Media & Communications, and Alumni Affairs", "external_relations");
+        addItem.accept("Office of the Vice President for Mission and Identity", "vp_mission");
+        addItem.accept("Campus Planning, Maintenance, and Security Department", "campus_planning");
+        addItem.accept("Dental Clinic", "dental");
+        addItem.accept("Medical Clinic", "medical");
+        addItem.accept("Technology Management and Development Department", "tmdd");
+
+        JScrollPane scroll = new JScrollPane(content);
+        scroll.setBorder(BorderFactory.createEmptyBorder());
+        panel.add(scroll, BorderLayout.CENTER);
+        return panel;
+    }
+
+    private JPanel buildAboutISLUPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(Color.WHITE);
+        panel.setBorder(BorderFactory.createTitledBorder(
+                BorderFactory.createLineBorder(Color.GRAY),
+                "About iSLU",
+                TitledBorder.LEFT,
+                TitledBorder.TOP,
+                new Font("Arial", Font.BOLD, 14)
+        ));
+
+        JPanel content = new JPanel();
+        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+        content.setBackground(Color.WHITE);
+        content.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JLabel overview = new JLabel("OVERVIEW");
+        overview.setFont(new Font("Arial", Font.BOLD, 13));
+        content.add(overview);
+        content.add(Box.createVerticalStrut(6));
+
+        JLabel about = new JLabel("ABOUT iSLU PORTAL");
+        about.setFont(new Font("Arial", Font.BOLD, 12));
+        content.add(about);
+
+        JTextArea aboutText = new JTextArea(
+                "iSLU Portal is for Saint Louis University students and parents, that serves as a\n" +
+                "personal assistant in carrying out university-related tasks.\n\n" +
+                "Students can view their personal details, schedules, current grades, accountabilities,\n" +
+                "curriculum checklist and more. Parents can also view these modules of their children as\n" +
+                "long they register.");
+        aboutText.setWrapStyleWord(true);
+        aboutText.setLineWrap(true);
+        aboutText.setEditable(false);
+        aboutText.setBackground(Color.WHITE);
+        aboutText.setFont(new Font("Arial", Font.PLAIN, 12));
+        content.add(aboutText);
+        content.add(Box.createVerticalStrut(10));
+
+        JLabel features = new JLabel("FEATURES AVAILABLE");
+        features.setFont(new Font("Arial", Font.BOLD, 12));
+        content.add(features);
+
+        JTextArea featuresText = new JTextArea(
+                "Personal Details: where a student can view his/her personal information.\n" +
+                "Class Schedule: where a student can view his/her enrolled subjects of the current term.\n" +
+                "Class Attendance: displays the absences of the student of the current term.\n" +
+                "Current Grades: shows the Prelim, Mid-term and Tentative final grades of a student.\n" +
+                "Transcript of Records: shows the final grades in the previous term of a student.\n" +
+                "Statements of Accounts: shows if a student still has account balance from the accounting office.\n" +
+                "Curriculum Checklist: shows the student's checklist of a curriculum chosen.\n" +
+                "School Calendar: where a student can view the school events and no classes within an academic year.");
+        featuresText.setWrapStyleWord(true);
+        featuresText.setLineWrap(true);
+        featuresText.setEditable(false);
+        featuresText.setBackground(Color.WHITE);
+        featuresText.setFont(new Font("Arial", Font.PLAIN, 12));
+        content.add(featuresText);
+        content.add(Box.createVerticalStrut(10));
+
+        JLabel howTo = new JLabel("HOW TO REGISTER? Or FORGOT USER ID Number and PASSWORD!");
+        howTo.setFont(new Font("Arial", Font.BOLD, 12));
+        content.add(howTo);
+
+        JTextArea howToText = new JTextArea(
+                "STUDENTS: proceed to IT CENTER SOFTWARE DEVELOPMENT (MIS), 2nd floor, Burgos Administrative Center, Saint Louis University.\n\n" +
+                "PARENTS/GUARDIANS: register at Registrar's office, Diego Silang building, Saint Louis University.");
+        howToText.setWrapStyleWord(true);
+        howToText.setLineWrap(true);
+        howToText.setEditable(false);
+        howToText.setBackground(Color.WHITE);
+        howToText.setFont(new Font("Arial", Font.PLAIN, 12));
+        content.add(howToText);
+
+        JScrollPane scroll = new JScrollPane(content);
+        scroll.setBorder(BorderFactory.createEmptyBorder());
+        panel.add(scroll, BorderLayout.CENTER);
+        return panel;
+    }
+
+    private JButton createLinkButton(String text) {
+        JButton button = new JButton(text);
+        button.setFont(new Font("Arial", Font.PLAIN, 12));
+        button.setForeground(Color.RED);
+        button.setContentAreaFilled(false);
+        button.setBorderPainted(false);
+        button.setFocusPainted(false);
+        return button;
+    }
+
     private JPanel createSidebar() {
         JPanel sidebar = new JPanel();
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
@@ -496,6 +715,9 @@ public class ISLUStudentPortal extends JFrame {
                 break;
             case "📋 Transcript of Records":
                 contentPanel.add(createTranscriptOfRecordsPanel());
+                break;
+            case "ℹ️ Downloadable/ About iSLU":
+                contentPanel.add(createDownloadablesAboutPanel());
                 break;
             default:
                 // Fallback for any other menu item with a sublist
