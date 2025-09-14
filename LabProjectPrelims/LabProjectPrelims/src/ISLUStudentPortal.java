@@ -479,6 +479,9 @@ public class ISLUStudentPortal extends JFrame {
             case "🏠 Home":
                 setupLayout();
                 break;
+            case "✅ Curriculum Checklist":
+                contentPanel.add(createCurriculumChecklistPanel());
+                break;
             case "📚 Journal/Periodical":
                 contentPanel.add(createJournalPeriodicalPanel());
                 break;
@@ -1070,6 +1073,212 @@ public class ISLUStudentPortal extends JFrame {
         } else if (component instanceof JComboBox) {
             ((JComboBox<String>) component).setSelectedItem(newValue);
         }
+    }
+    // Curriculum Checklist Panel
+    private JPanel createCurriculumChecklistPanel() {
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(new Color(240, 240, 240));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        JPanel contentWrapper = new JPanel(new BorderLayout());
+        contentWrapper.setBackground(Color.WHITE);
+        contentWrapper.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200)),
+            BorderFactory.createEmptyBorder(0, 0, 0, 0)
+        ));
+
+        // Header
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        headerPanel.setBackground(new Color(10, 45, 90));
+        headerPanel.setPreferredSize(new Dimension(0, 50));
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+        JLabel headerLabel = new JLabel("Curriculum Checklist");
+        headerLabel.setForeground(Color.WHITE);
+        headerLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        headerPanel.add(headerLabel, BorderLayout.WEST);
+        contentWrapper.add(headerPanel, BorderLayout.NORTH);
+
+        // Title under header similar to screenshot
+        JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 12));
+        titlePanel.setBackground(Color.WHITE);
+        JLabel title = new JLabel("BACHELOR OF SCIENCE IN INFORMATION TECHNOLOGY FIRST SEMESTER, 2018-2019");
+        title.setFont(new Font("Arial", Font.BOLD, 12));
+        titlePanel.add(title);
+
+        // Body with grouped terms
+        JPanel body = new JPanel();
+        body.setLayout(new BoxLayout(body, BoxLayout.Y_AXIS));
+        body.setBackground(Color.WHITE);
+        body.setBorder(BorderFactory.createEmptyBorder(10, 10, 20, 10));
+
+        // Column header row (like screenshot: Course Number, Course Description, Units)
+        JPanel columnsHeader = new JPanel(new GridLayout(1, 4));
+        columnsHeader.setBackground(new Color(245, 245, 245));
+        columnsHeader.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(1, 1, 1, 1, new Color(220, 220, 220)),
+            new EmptyBorder(6, 10, 6, 10)
+        ));
+        columnsHeader.add(new JLabel(""));
+        JLabel colCourseNo = new JLabel("Course Number");
+        colCourseNo.setFont(new Font("Arial", Font.BOLD, 12));
+        columnsHeader.add(colCourseNo);
+        JLabel colDesc = new JLabel("Course Description");
+        colDesc.setFont(new Font("Arial", Font.BOLD, 12));
+        columnsHeader.add(colDesc);
+        JLabel colUnits = new JLabel("Units", SwingConstants.RIGHT);
+        colUnits.setFont(new Font("Arial", Font.BOLD, 12));
+        columnsHeader.add(colUnits);
+
+        JPanel listPanel = new JPanel();
+        listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
+        listPanel.setBackground(Color.WHITE);
+
+        // Build sections
+        java.util.List<CurriculumTerm> terms = getCurriculumPlan();
+        for (CurriculumTerm term : terms) {
+            addTermSection(listPanel, term);
+        }
+
+        JPanel centerPanel = new JPanel();
+        centerPanel.setLayout(new BorderLayout());
+        centerPanel.setBackground(Color.WHITE);
+        centerPanel.add(titlePanel, BorderLayout.NORTH);
+        centerPanel.add(columnsHeader, BorderLayout.CENTER);
+
+        JPanel listContainer = new JPanel();
+        listContainer.setLayout(new BorderLayout());
+        listContainer.setBackground(Color.WHITE);
+        listContainer.add(listPanel, BorderLayout.NORTH);
+
+        JPanel composed = new JPanel();
+        composed.setLayout(new BorderLayout());
+        composed.setBackground(Color.WHITE);
+        composed.add(centerPanel, BorderLayout.NORTH);
+        composed.add(listContainer, BorderLayout.CENTER);
+
+        JScrollPane scroll = new JScrollPane(composed);
+        scroll.setBorder(null);
+        scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+
+        contentWrapper.add(scroll, BorderLayout.CENTER);
+        mainPanel.add(contentWrapper, BorderLayout.CENTER);
+        return mainPanel;
+    }
+
+    private void addTermSection(JPanel parent, CurriculumTerm term) {
+        JPanel titleRow = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 10));
+        titleRow.setBackground(Color.WHITE);
+        JLabel label = new JLabel(term.title);
+        label.setFont(new Font("Arial", Font.BOLD, 12));
+        titleRow.add(label);
+        parent.add(titleRow);
+
+        String[] columnNames = {"", "Course Number", "Course Description", "Units"};
+        Object[][] data = new Object[term.courses.size()][4];
+        for (int i = 0; i < term.courses.size(); i++) {
+            CurriculumCourse c = term.courses.get(i);
+            data[i][0] = c.completed ? "✅" : "";
+            data[i][1] = c.courseNumber;
+            data[i][2] = c.courseDescription;
+            data[i][3] = c.units;
+        }
+
+        DefaultTableModel model = new DefaultTableModel(data, columnNames) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        JTable table = new JTable(model);
+        table.setRowHeight(26);
+        table.getTableHeader().setReorderingAllowed(false);
+        table.setAutoCreateRowSorter(false);
+        table.getColumnModel().getColumn(0).setMaxWidth(36);
+        table.getColumnModel().getColumn(3).setMaxWidth(60);
+        javax.swing.table.DefaultTableCellRenderer rightRenderer = new javax.swing.table.DefaultTableCellRenderer();
+        rightRenderer.setHorizontalAlignment(SwingConstants.RIGHT);
+        table.getColumnModel().getColumn(3).setCellRenderer(rightRenderer);
+        JScrollPane tableScroll = new JScrollPane(table);
+        tableScroll.setBorder(BorderFactory.createMatteBorder(0, 1, 1, 1, new Color(220, 220, 220)));
+        parent.add(tableScroll);
+    }
+
+    private static class CurriculumCourse {
+        final String courseNumber;
+        final String courseDescription;
+        final int units;
+        final boolean completed;
+        CurriculumCourse(String courseNumber, String courseDescription, int units, boolean completed) {
+            this.courseNumber = courseNumber;
+            this.courseDescription = courseDescription;
+            this.units = units;
+            this.completed = completed;
+        }
+    }
+
+    private static class CurriculumTerm {
+        final String title;
+        final java.util.List<CurriculumCourse> courses;
+        CurriculumTerm(String title, java.util.List<CurriculumCourse> courses) {
+            this.title = title;
+            this.courses = courses;
+        }
+    }
+
+    private java.util.List<CurriculumTerm> getCurriculumPlan() {
+        java.util.List<CurriculumTerm> terms = new java.util.ArrayList<>();
+
+        // First Year, First Semester
+        java.util.List<CurriculumCourse> y1s1 = new java.util.ArrayList<>();
+        y1s1.add(new CurriculumCourse("CFE 101", "GOD'S JOURNEY WITH HIS PEOPLE", 3, true));
+        y1s1.add(new CurriculumCourse("FIT HW", "PHYSICAL ACTIVITY TOWARDS HEALTH AND FITNESS (HEALTH AND WELLNESS)", 2, true));
+        y1s1.add(new CurriculumCourse("GART", "ART APPRECIATION", 3, true));
+        y1s1.add(new CurriculumCourse("GHIST", "READINGS IN PHILIPPINE HISTORY", 3, true));
+        y1s1.add(new CurriculumCourse("GSELF", "UNDERSTANDING THE SELF", 3, true));
+        y1s1.add(new CurriculumCourse("IT 111", "INTRODUCTION TO COMPUTING (LEC)", 2, true));
+        y1s1.add(new CurriculumCourse("IT 111L", "INTRODUCTION TO COMPUTING (LAB)", 1, true));
+        y1s1.add(new CurriculumCourse("IT 112", "COMPUTER PROGRAMMING 1 (LEC)", 2, true));
+        y1s1.add(new CurriculumCourse("IT 112L", "COMPUTER PROGRAMMING 1 (LAB)", 1, true));
+        y1s1.add(new CurriculumCourse("IT 113", "DISCRETE MATHEMATICS", 3, true));
+        terms.add(new CurriculumTerm("First Year, First Semester", y1s1));
+
+        // First Year, Second Semester
+        java.util.List<CurriculumCourse> y1s2 = new java.util.ArrayList<>();
+        y1s2.add(new CurriculumCourse("CFE 102", "CHRISTIAN MORALITY IN OUR TIMES", 3, true));
+        y1s2.add(new CurriculumCourse("FIT CS", "PHYSICAL ACTIVITY TOWARDS HEALTH AND FITNESS (COMBATIVE SPORTS)", 2, true));
+        y1s2.add(new CurriculumCourse("GCWORLD", "THE CONTEMPORARY WORLD", 3, true));
+        y1s2.add(new CurriculumCourse("GMATH", "MATHEMATICS IN THE MODERN WORLD", 3, true));
+        y1s2.add(new CurriculumCourse("GPCOM", "PURPOSIVE COMMUNICATION", 3, true));
+        y1s2.add(new CurriculumCourse("IT 121", "INFORMATION SYSTEM FUNDAMENTALS", 3, true));
+        y1s2.add(new CurriculumCourse("IT 122", "COMPUTER PROGRAMMING 2", 2, true));
+        y1s2.add(new CurriculumCourse("IT 122L", "COMPUTER PROGRAMMING 2 (LAB)", 1, true));
+        y1s2.add(new CurriculumCourse("IT 123", "PLATFORM TECHNOLOGIES", 2, true));
+        y1s2.add(new CurriculumCourse("IT 123L", "PLATFORM TECHNOLOGIES (LAB)", 1, true));
+        terms.add(new CurriculumTerm("First Year, Second Semester", y1s2));
+
+        // First Year, Short Term
+        java.util.List<CurriculumCourse> y1st = new java.util.ArrayList<>();
+        y1st.add(new CurriculumCourse("GRIZAL", "THE LIFE AND WORKS OF RIZAL", 3, true));
+        y1st.add(new CurriculumCourse("IT 131", "COMPUTER ARCHITECTURE", 2, true));
+        y1st.add(new CurriculumCourse("IT 131L", "COMPUTER ARCHITECTURE (LAB)", 1, true));
+        terms.add(new CurriculumTerm("First Year, Short Term", y1st));
+
+        // Second Year, First Semester
+        java.util.List<CurriculumCourse> y2s1 = new java.util.ArrayList<>();
+        y2s1.add(new CurriculumCourse("CFE 103", "CATHOLIC FOUNDATION OF MISSION", 3, false));
+        y2s1.add(new CurriculumCourse("FIT OA", "PHYSICAL ACTIVITY TOWARDS HEALTH AND FITNESS (OUTDOOR AND ADVENTURE ACTIVITIES)", 2, false));
+        y2s1.add(new CurriculumCourse("GENVI", "ENVIRONMENTAL SCIENCE", 3, false));
+        y2s1.add(new CurriculumCourse("GSTS", "SCIENCE, TECHNOLOGY, AND SOCIETY", 3, false));
+        y2s1.add(new CurriculumCourse("IT 211", "REQUIREMENTS ANALYSIS AND MODELING", 3, false));
+        y2s1.add(new CurriculumCourse("IT 212", "DATA STRUCTURES (LEC)", 2, false));
+        y2s1.add(new CurriculumCourse("IT 212L", "DATA STRUCTURES (LAB)", 1, false));
+        y2s1.add(new CurriculumCourse("IT 213", "NETWORK FUNDAMENTALS (LEC)", 2, false));
+        y2s1.add(new CurriculumCourse("IT 213L", "NETWORK FUNDAMENTALS (LAB)", 1, false));
+        terms.add(new CurriculumTerm("Second Year, First Semester", y2s1));
+
+        return terms;
     }
 // Generic Content
 
