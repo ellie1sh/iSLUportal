@@ -133,6 +133,146 @@ public class MyDoublyLinkedList<T> implements Iterable<T> {
         }
         current.setData(data);
     }
+    
+    /**
+     * Removes the first occurrence of the specified element from the list
+     * @param data The element to remove
+     * @return true if the element was found and removed, false otherwise
+     */
+    public boolean remove(T data) {
+        DoublyLinkedNode<T> current = head;
+        
+        while (current != null) {
+            if (current.getData().equals(data)) {
+                removeNode(current);
+                return true;
+            }
+            current = current.getNext();
+        }
+        return false;
+    }
+    
+    /**
+     * Removes the element at the specified index
+     * @param index The index of the element to remove
+     * @return The data that was removed
+     */
+    public T removeAt(int index) {
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
+        }
+        
+        DoublyLinkedNode<T> nodeToRemove;
+        
+        if (index == 0) {
+            nodeToRemove = head;
+            removeFirst();
+        } else if (index == size - 1) {
+            nodeToRemove = tail;
+            removeLast();
+        } else {
+            nodeToRemove = head;
+            for (int i = 0; i < index; i++) {
+                nodeToRemove = nodeToRemove.getNext();
+            }
+            removeNode(nodeToRemove);
+        }
+        
+        return nodeToRemove.getData();
+    }
+    
+    /**
+     * Helper method to remove a specific node from the list
+     * @param nodeToRemove The node to remove
+     */
+    private void removeNode(DoublyLinkedNode<T> nodeToRemove) {
+        if (nodeToRemove == head && nodeToRemove == tail) {
+            // Only one element
+            head = null;
+            tail = null;
+        } else if (nodeToRemove == head) {
+            // Removing first element
+            head = head.getNext();
+            head.setPrev(null);
+        } else if (nodeToRemove == tail) {
+            // Removing last element
+            tail = tail.getPrev();
+            tail.setNext(null);
+        } else {
+            // Removing middle element
+            nodeToRemove.getPrev().setNext(nodeToRemove.getNext());
+            nodeToRemove.getNext().setPrev(nodeToRemove.getPrev());
+        }
+        size--;
+    }
+    
+    /**
+     * Inserts an element at the specified index
+     * @param index The index at which to insert the element
+     * @param data The element to insert
+     */
+    public void insert(int index, T data) {
+        if (index < 0 || index > size) {
+            throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size);
+        }
+        
+        if (index == 0) {
+            addFirst(data);
+        } else if (index == size) {
+            addLast(data);
+        } else {
+            DoublyLinkedNode<T> newNode = new DoublyLinkedNode<>(data);
+            DoublyLinkedNode<T> current = head;
+            
+            for (int i = 0; i < index; i++) {
+                current = current.getNext();
+            }
+            
+            newNode.setNext(current);
+            newNode.setPrev(current.getPrev());
+            current.getPrev().setNext(newNode);
+            current.setPrev(newNode);
+            size++;
+        }
+    }
+    
+    /**
+     * Returns the index of the first occurrence of the specified element
+     * @param data The element to search for
+     * @return The index of the element, or -1 if not found
+     */
+    public int indexOf(T data) {
+        DoublyLinkedNode<T> current = head;
+        int index = 0;
+        
+        while (current != null) {
+            if (current.getData().equals(data)) {
+                return index;
+            }
+            current = current.getNext();
+            index++;
+        }
+        return -1;
+    }
+    
+    /**
+     * Returns the index of the last occurrence of the specified element
+     * @param data The element to search for
+     * @return The index of the element, or -1 if not found
+     */
+    public int lastIndexOf(T data) {
+        DoublyLinkedNode<T> current = tail;
+        int index = size - 1;
+        
+        while (current != null) {
+            if (current.getData().equals(data)) {
+                return index;
+            }
+            current = current.getPrev();
+            index--;
+        }
+        return -1;
+    }
 
     @Override
     public String toString() {
