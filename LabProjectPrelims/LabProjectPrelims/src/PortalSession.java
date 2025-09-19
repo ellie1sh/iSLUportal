@@ -44,11 +44,24 @@ public class PortalSession {
     public String getSessionSummary() {
         StringBuilder summary = new StringBuilder();
         summary.append("Portal Session Summary:\n");
-        summary.append("Student: ").append(studentInfo.getFullName()).append("\n");
-        summary.append("Student ID: ").append(studentInfo.getId()).append("\n");
-        summary.append("Available Menu Items: ").append(menu.getSize()).append("\n");
-        summary.append("Payment Transactions: ").append(transactions.size()).append("\n");
-        summary.append("Current Menu: ").append(getCurrentMenuItem().getName()).append("\n");
+        
+        if (studentInfo != null) {
+            summary.append("Student: ").append(studentInfo.getFullName()).append("\n");
+            summary.append("Student ID: ").append(studentInfo.getId()).append("\n");
+        } else {
+            summary.append("Student: [Not Found]\n");
+            summary.append("Student ID: [Unknown]\n");
+        }
+        
+        summary.append("Available Menu Items: ").append(menu != null ? menu.getSize() : 0).append("\n");
+        summary.append("Payment Transactions: ").append(transactions != null ? transactions.size() : 0).append("\n");
+        
+        if (menu != null && menu.getSize() > 0) {
+            summary.append("Current Menu: ").append(getCurrentMenuItem().getName()).append("\n");
+        } else {
+            summary.append("Current Menu: [No menu available]\n");
+        }
+        
         return summary.toString();
     }
 }
