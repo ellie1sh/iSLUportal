@@ -123,8 +123,16 @@ public class IntegrationTest {
         MyDoublyLinkedList<StudentInfo> students = PortalUtils.createStudentManagementSystem();
         System.out.println("   ✓ Created student management system with " + students.getSize() + " students");
         
-        // Test portal session creation
-        PortalSession session = PortalUtils.createPortalSession("2250001");
+        // Test portal session creation (use an existing student from the database if available)
+        String validStudentId;
+        List<StudentInfo> allStudents = DataManager.getAllStudents();
+        if (!allStudents.isEmpty()) {
+            validStudentId = allStudents.get(0).getId();
+        } else {
+            // Fallback to original hardcoded ID if database is empty
+            validStudentId = "2250001";
+        }
+        PortalSession session = PortalUtils.createPortalSession(validStudentId);
         System.out.println("   ✓ Created portal session");
         System.out.println("   " + session.getSessionSummary());
         
